@@ -86,15 +86,15 @@ class CookieTokenObtainPairView(TokenObtainPairView):
             key='access_token',
             value=access_token,
             httponly=True,
-            secure=False,  # ❗Change to True in production (https)
+            secure=False,  # Change to True in production (https)
             samesite='Lax',
-            max_age=60 * 5,  # 5 mins
+            max_age=60 * 5, 
         )
         response.set_cookie(
             key='refresh_token',
             value=refresh_token,
             httponly=True,
-            secure=False, # ❗Change to True in production (https)
+            secure=False, # Change to True in production (https)
             samesite='Lax',  # change to none if backend and frontend are deployed separatedly
             max_age=60 * 60 * 24 * 7,
         )
