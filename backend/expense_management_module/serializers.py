@@ -10,7 +10,7 @@ class ExpenseSerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField(read_only=True)
     category = CategorySerializer(read_only=True)
     category_id = serializers.PrimaryKeyRelatedField(
-        queryset = Category.objects.all(), source='category', read_only=True
+        queryset = Category.objects.all(), source='category', write_only=True
     )
     
     class Meta:

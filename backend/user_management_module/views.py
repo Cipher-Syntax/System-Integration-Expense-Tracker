@@ -12,6 +12,7 @@ from django.core.mail import send_mail
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView #type: ignore
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer #type: ignore
 from rest_framework.exceptions import AuthenticationFailed #type: ignore
+from django.conf import settings
 
 
 # Create your views here.
@@ -41,12 +42,12 @@ class PasswordResetRequestView(generics.GenericAPIView):
         user = User.objects.get(email=email)
         token = default_token_generator.make_token(user)
         uid = urlsafe_base64_encode(force_bytes(user.pk))
-        reset_link = f"http://localhost:8000/api/reset-password/{uid}/{token}/"
+        reset_link = f"{settings.BACKEND_BASE_URL}/api/reset-password/{uid}/{token}/"
 
         send_mail(
             subject="Reset Your Password",
             message=f"Hi {user.username},\n\nClick this link to reset your password:\n{reset_link}\n\nIf you didn't request this, ignore this email.",
-            from_email="no-reply@yourapp.com",
+            from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[user.email],
             fail_silently=False,
         )
