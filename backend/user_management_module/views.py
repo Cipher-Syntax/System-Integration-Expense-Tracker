@@ -28,7 +28,7 @@ class UpdateUserView(generics.RetrieveUpdateAPIView):
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
     
-    def get_queryset(self):
+    def get_object(self):
         return self.request.user
     
 class PasswordResetRequestView(generics.GenericAPIView):
