@@ -15,3 +15,4 @@ class Notification(models.Model):
     status = models.CharField(max_length=50, choices=STATUS_CHOICE, default="Unsent")
     created_at = models.DateTimeField(auto_now_add=True)
     
+    

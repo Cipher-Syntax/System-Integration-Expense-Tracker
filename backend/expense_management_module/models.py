@@ -15,3 +15,4 @@ class Expense(models.Model):
     date = models.DateField()
     description = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    

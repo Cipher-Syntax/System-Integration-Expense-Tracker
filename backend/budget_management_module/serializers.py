@@ -8,3 +8,4 @@ class BudgetSerializer(serializers.ModelSerializer):
         model = Budget
         fields = ['id', 'user', 'limit_amount', 'start_date', 'end_date']
         read_only_fields = ['user']
+        
