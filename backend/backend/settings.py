@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     # Third Party Apps
     'rest_framework',
     'corsheaders',
+    "rest_framework_simplejwt.token_blacklist",
 ]
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -147,8 +148,12 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', cast=Csv())
+CORS_ALLOW_CREDENTIALS = config('CORS_ALLOW_CREDENTIALS', cast=bool)
+CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', cast=Csv())
 AUTH_USER_MODEL = 'user_management_module.User'
 BACKEND_BASE_URL = config('BACKEND_BASE_URL')
+BLACKLIST_AFTER_ROTATION = config('BLACKLIST_AFTER_ROTATION', cast=bool)
+
 
 # EMAIL
 EMAIL_BACKEND = config('EMAIL_BACKEND')
