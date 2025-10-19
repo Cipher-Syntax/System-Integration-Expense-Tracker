@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form'
 import api from "../api/api";
 
 const Form = ({ route, method }) => {
-    const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm();
+    const { register, handleSubmit, formState: { errors, isSubmitting }, setValue } = useForm();
     const [error, setError] = useState("");
     const [remembered, setRemembered] = useState(false);
     const navigate = useNavigate();
@@ -19,11 +19,25 @@ const Form = ({ route, method }) => {
         }
     }, [error])
 
+    useEffect(() => {
+        const savedUsername = localStorage.getItem("rememberedUsername");
+        if (savedUsername) {
+            setRemembered(true);
+            setValue("username", savedUsername);
+        }
+    }, []);
+
+
     const onSubmit = async (data) => {
         try{
             const response = await api.post(route, data, {withCredentials: true});
             console.log(data)
             if(method === "login"){
+                if(remembered){
+                    localStorage.setItem("rememberedUsername", data.username);
+                } else {
+                    localStorage.removeItem("rememberedUsername");
+                }
                 navigate('/');
             }
             else{
@@ -252,7 +266,7 @@ const Form = ({ route, method }) => {
                                                     Keep me signed in
                                                 </label>
                                             </div>
-                                            <Link to="#" className="text-xs text-pink-500 hover:text-pink-600 font-medium">
+                                            <Link to="/forgot-password" className="text-xs text-pink-500 hover:text-pink-600 font-medium">
                                                 Forgot?
                                             </Link>
                                         </div>
