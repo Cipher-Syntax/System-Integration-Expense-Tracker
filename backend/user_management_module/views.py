@@ -13,6 +13,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer #type: ignore
 from rest_framework.exceptions import AuthenticationFailed #type: ignore
 from django.conf import settings
+from rest_framework.views import APIView #type: ignore
 
 
 # Create your views here.
@@ -22,6 +23,13 @@ class CreateUserView(generics.CreateAPIView):
     queryset = User.objects.all().order_by('-date_joined')
     serializer_class = UserSerializer
     permission_classes = [permissions.AllowAny]
+
+class CurrentUserView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        serializer = UserSerializer(request.user)
+        return Response(serializer.data)
     
 class UpdateUserView(generics.RetrieveUpdateAPIView):
     queryset = User.objects.all()
