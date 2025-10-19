@@ -5,10 +5,10 @@ import { Footer, Header, Sidebar } from '../components'
 
 const Layout = () => {
     return (
-        <div className='flex items-left justify-left gap-x-10 bg-gray-300 h-screen'>
+        <div className='flex items-left justify-left gap-x-10 bg-gray-200 min-h-screen'>
             <Sidebar></Sidebar>
             
-            <header className='w-full fixed left-[84%]'>
+            <header className='w-full fixed left-[79%]'>
                 <Header></Header>
             </header>
             <main>

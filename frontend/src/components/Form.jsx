@@ -80,7 +80,7 @@ const Form = ({ route, method }) => {
 
     return (
         <div className="h-screen bg-gradient-to-br from-pink-50 via-white to-pink-50 overflow-hidden">
-            <div className="absolute top-0 right-0 w-80 h-80 bg-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
+            <div className="absolute top-0 right-0 w-80 h-80 bg-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
             <div className="absolute bottom-0 left-0 w-80 h-80 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
             <div className="absolute top-5 w-80 h-80 bg-pink-100 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
             <div className="relative flex items-center justify-center h-full px-4">
