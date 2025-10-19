@@ -6,20 +6,17 @@ import { Footer, Header, Sidebar } from '../components'
 const Layout = () => {
     return (
         <div className='flex items-left justify-left gap-x-10 bg-gray-300 h-screen'>
-            <div>
-                <Sidebar></Sidebar>
-            </div>
-            <div>
-                <header>
-                    <Header></Header>
-                </header>
-                <main>
-                    <Outlet></Outlet>
-                </main>
-                <footer>
-                    <Footer></Footer>
-                </footer>
-            </div>
+            <Sidebar></Sidebar>
+            
+            <header className='w-full fixed left-[84%]'>
+                <Header></Header>
+            </header>
+            <main>
+                <Outlet></Outlet>
+            </main>
+            <footer className='w-[300px] fixed left-[80%] bottom-[5%]'>
+                <Footer></Footer>
+            </footer>
         </div>
     )
 }

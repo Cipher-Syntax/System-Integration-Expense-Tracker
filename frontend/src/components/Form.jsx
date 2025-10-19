@@ -38,6 +38,7 @@ const Form = ({ route, method }) => {
                 } else {
                     localStorage.removeItem("rememberedUsername");
                 }
+                localStorage.setItem('user', data.username);
                 navigate('/');
             }
             else{
