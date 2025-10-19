@@ -5,7 +5,7 @@ import { Footer, Header, Sidebar } from '../components'
 
 const Layout = () => {
     return (
-        <div className='flex items-left justify-left gap-x-10'>
+        <div className='flex items-left justify-left gap-x-10 bg-gray-300 h-screen'>
             <div>
                 <Sidebar></Sidebar>
             </div>
