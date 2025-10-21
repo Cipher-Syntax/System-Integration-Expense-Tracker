@@ -8,7 +8,7 @@ const Layout = () => {
         <div className='flex items-left justify-left gap-x-10 bg-gray-200 min-h-screen'>
             <Sidebar></Sidebar>
             
-            <header className='w-full fixed left-[79%]'>
+            <header className='absolute right-0'>
                 <Header></Header>
             </header>
             <main>
