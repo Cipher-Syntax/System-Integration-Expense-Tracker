@@ -9,6 +9,7 @@ class Category(models.Model):
     
 class Expense(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, blank=True, null=True)
     budget = models.ForeignKey(Budget, on_delete=models.CASCADE, related_name="expenses")
     amount = models.DecimalField(max_digits=10, decimal_places=2)

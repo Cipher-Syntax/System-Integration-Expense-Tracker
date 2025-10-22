@@ -15,5 +15,5 @@ class ExpenseSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Expense
-        fields = ['id', 'user', 'category', 'category_id', 'budget', 'amount', 'date', 'description', 'created_at']
+        fields = ['id', 'user', 'name', 'category', 'category_id', 'budget', 'amount', 'date', 'description', 'created_at']
         read_only_fields = ['user']
