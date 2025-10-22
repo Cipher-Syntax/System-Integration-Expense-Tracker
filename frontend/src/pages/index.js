@@ -4,6 +4,7 @@ import Login from "./Login";
 import Register from "./Register";
 import NotFound from "./NotFound";
 import ForgotPassword from "./ForgotPassword";
+import Expenses from "./Expenses";
 
 export {
     Layout,
@@ -12,4 +13,5 @@ export {
     Register,
     NotFound,
     ForgotPassword,
+    Expenses,
 }
