@@ -1,16 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import api from '../api/api'
-import {
-    Area,
-    AreaChart,
-    XAxis,
-    YAxis,
-    CartesianGrid,
-    Tooltip,
-    ResponsiveContainer,
-} from 'recharts';
+import { Area, AreaChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { ArrowRight } from 'lucide-react';
-
 
 const Dashboard = () => {
     const [availableBalance, setAvailableBalance] = useState(null);
@@ -56,7 +47,6 @@ const Dashboard = () => {
     };
 
     const filteredData = getFilteredData();
-
 
 
     useEffect(() => {
@@ -154,7 +144,7 @@ const Dashboard = () => {
                         <h2 className='text-gray-500'>Available Balance</h2>
                         <h3 className='sm:text-4xl mt-4 font-bold leading-relaxed tracking-widest text-[#F844CE]'>₱
                             {
-                                availableBalance !== null ? parseFloat(availableBalance).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : <p className='text-center'>Loading...</p>
+                                availableBalance !== null ? parseFloat(availableBalance).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '0.00'
                             }
                             
                         </h3>
@@ -165,8 +155,8 @@ const Dashboard = () => {
                         <div className='text-center flex flex-col items-center w-[160px]'>
                             <h2 className='text-gray-500'>Total Expenses</h2>
                             <h3 className='sm:text-[14px] mt-2 font-bold leading-relaxed tracking-widest text-[#d70909]'>
-                                ₱{
-                                    totalExpenses !== null ? parseFloat(totalExpenses).toLocaleString('en-PH', {minimumFractionDigits: 2}) : 'Loading...'
+                                ₱ {
+                                    totalExpenses !== null ? parseFloat(totalExpenses).toLocaleString('en-PH', {minimumFractionDigits: 2}) : '0.00'
                                 }
                             </h3>
                         </div>
@@ -176,8 +166,8 @@ const Dashboard = () => {
                         <div className='text-center flex flex-col items-center w-[160px]'>
                             <h2 className='text-gray-500'>Budget</h2>
                             <h3 className='sm:text-[14px] mt-2 font-bold leading-relaxed tracking-widest text-[#3B82F6]'>
-                                ₱{
-                                    budget !== null ? parseFloat(budget).toLocaleString('en-PH', {minimumFractionDigits: 2}) : 'Loading...'
+                                ₱ {
+                                    budget !== null ? parseFloat(budget).toLocaleString('en-PH', {minimumFractionDigits: 2}) : '0.00'
                                 }
                             </h3>
                         </div>
@@ -203,20 +193,18 @@ const Dashboard = () => {
                         </p>
                         {
                             progressPercent >= 96 && progressPercent <= 99 ? (
-                                <p className='text-[9px] text-center text-red-500 w-[300px] mx-auto'>You've' reached 96% of your budget</p>
+                                <p className='text-[10px] text-center text-red-500 w-[300px] mx-auto'>You've' reached 96% of your budget</p>
                             ) : (
                                 ""
                             )
                         }
                         {
                             progressPercent === 100 ? (
-                                <p className='text-[9px] text-center text-red-500 w-[300px] mx-auto'>You've' already reached the maximum budget. Change to new budget</p>
+                                <p className='text-[10px] text-center text-red-500 w-[300px] mx-auto'>You've' already reached the maximum budget. Change to new budget</p>
                             ) : (
                                 ""
                             )
-                        }
-
-                        
+                        }                        
                     </div>
                 </div>
                 
@@ -236,8 +224,8 @@ const Dashboard = () => {
                         <div className="flex-1 min-h-[200px] min-w-[200px]">
                         <ResponsiveContainer width="95%" height="90%">
                             <AreaChart
-                            data={filteredData}
-                            margin={{ top: 10, right: 20, left: 0, bottom: 10 }}
+                                data={filteredData}
+                                margin={{ top: 10, right: 20, left: 0, bottom: 10 }}
                             >
                             <defs>
                                 <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
@@ -268,7 +256,7 @@ const Dashboard = () => {
                         </ResponsiveContainer>
                         </div>
                     ) : (
-                        <p className="text-gray-500 text-center mt-12">Loading chart...</p>
+                        <p className="text-gray-500 text-center mt-12">No Chart To Show Yet</p>
                     )}
                 </div>
             </div>
@@ -332,7 +320,6 @@ const Dashboard = () => {
                         }
                     </div>
                 </div>
-
             </div>
         </section>
     )
