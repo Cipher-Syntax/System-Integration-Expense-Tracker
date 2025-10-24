@@ -6,7 +6,7 @@ const Sidebar = () => {
     const navLinks = [
         {icon: <LayoutDashboard/>, linkTo: "/" , name: 'Dashboard'},
         {icon: <PhilippinePeso />, linkTo: "/expenses", name: 'Expense'},
-        {icon: <Banknote />, linkTo: "/budget", name: 'Budget'},
+        {icon: <Banknote />, linkTo: "/budgets", name: 'Budget'},
         {icon: <MessageCircleWarning />, linkTo: "/reports", name: 'Reports'},
         {icon: <Settings />, linkTo: 'settings', name: 'Settings'},
         {icon: <LogOut />, linkTo: '/logout', name: 'Logout'},

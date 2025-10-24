@@ -4,13 +4,118 @@ import { Link, useSearchParams } from 'react-router-dom';
 import api from '../api/api';
 
 const Expenses = () => {
-    const [searchQuery, setSearchQuery] = useSearchParams();
     const [searchParams, setSearchParams] = useSearchParams();
 
     const q = searchParams.get('q') || '';
     const category = searchParams.get('category') || '';
     const date = searchParams.get('date') || '';
     const amount = searchParams.get('amount') || '';
+    const [showModal, setShowModal] = useState(false);
+    const [currentExpense, setCurrentExpense] = useState({
+        name: '',
+        description: '',
+        date: '',
+        amount: '',
+        category: '',
+        budget: ''
+    });
+    
+    const [deleteTarget, setDeleteTarget] = useState(null);
+
+    const handleDeleteClick = (expense) => {
+        setDeleteTarget(expense);
+    };
+
+    const confirmDelete = async () => {
+        try {
+            await api.delete(`api/expenses/${deleteTarget.id}/`);
+            setExpenses((prev) => prev.filter((exp) => exp.id !== deleteTarget.id));
+            setDeleteTarget(null);
+        } catch (error) {
+            console.error("Failed to delete expense:", error);
+        }
+    };
+
+
+
+
+    const [budgets, setBudgets] = useState([]);
+    // console.log(budgets.limit_amount);
+    const [amountError, setAmountError] = useState('');
+
+
+    const isEditing = !!currentExpense.id;
+
+
+    const handleSave = async () => {
+        try {
+
+             setAmountError('');
+            if (currentExpense.budget && currentExpense.amount) {
+                const selectedBudget = budgets.find(
+                    b => b.id === currentExpense.budget.id || b.id === currentExpense.budget
+                );
+
+                if (selectedBudget) {
+                    const budgetExpenses = expenses.filter(
+                        exp => exp.budget === selectedBudget.id || exp.budget?.id === selectedBudget.id
+                    );
+
+                    const currentTotal = budgetExpenses.reduce(
+                        (sum, exp) => sum + (exp.id === currentExpense.id ? 0 : parseFloat(exp.amount)),
+                        0
+                    );
+
+                    const newTotal = currentTotal + parseFloat(currentExpense.amount);
+
+                    if (newTotal > parseFloat(selectedBudget.limit_amount)) {
+                        setAmountError(
+                            `Adding this expense will exceed your budget limit of ₱${selectedBudget.limit_amount.toLocaleString()}.`
+                        );
+                        return;
+                    }
+                }
+            }
+
+
+            const formattedDate = currentExpense.date ? new Date(currentExpense.date).toISOString().split("T")[0]
+            : null;
+
+            const payload = {
+                name: currentExpense.name,
+                description: currentExpense.description,
+                date: formattedDate,
+                amount: currentExpense.amount,
+                category_id: currentExpense.category?.id || currentExpense.category,
+                budget: currentExpense.budget.id || null,
+            };
+
+            let response;
+            if (isEditing) {
+                response = await api.patch(`api/expenses/${currentExpense.id}/`, payload);
+                setExpenses((prev) =>
+                    prev.map((exp) => (exp.id === currentExpense.id ? response.data : exp))
+                );
+            } else {
+                response = await api.post(`api/expenses/`, payload);
+                setExpenses((prev) => [...prev, response.data]);
+            }
+
+            setShowModal(false);
+            setCurrentExpense({
+                name: '',
+                description: '',
+                date: '',
+                amount: '',
+                category: '',
+                budget: ''
+            });
+        } catch (error) {
+            console.error("Failed to save expense:", error);
+            console.log(error.response?.data);
+        }
+    };
+
 
     const [categories, setCategories] = useState([]);
     const [expenses, setExpenses] = useState([]);
@@ -61,7 +166,6 @@ const Expenses = () => {
         }
     };
 
-
     useEffect(() => {
         const fetchCategories = async () => {
             try{
@@ -85,6 +189,15 @@ const Expenses = () => {
         }
 
         fetchExpenses();
+    }, [])
+
+    useEffect(() => {
+        const fetchBudgets = async () => {
+            const response = await api.get('api/budgets/');
+            setBudgets(response.data);
+        }
+
+        fetchBudgets()
     }, [])
 
     
@@ -180,7 +293,22 @@ const Expenses = () => {
                             </select>
 
                         </div>
-                        <Link className='w-[250px] py-2 px-2 bg-pink-500 text-white text-center rounded-md font-bold leading-relaxed tracking-wider'>Add Expenses</Link>
+                        <button
+                            className="w-[250px] py-2 px-2 bg-pink-500 text-white text-center rounded-md font-bold cursor-pointer"
+                            onClick={() => {
+                                setCurrentExpense({
+                                    name: '',
+                                    description: '',
+                                    date: '',
+                                    amount: '',
+                                    category: '',
+                                    budget: ''
+                                });
+                                setShowModal(true);
+                            }}
+                        >
+                            Add Expense
+                        </button>
                     </div>
                 </div>
 
@@ -210,10 +338,19 @@ const Expenses = () => {
                                         <td className='py-2 border px-3'>{expense.date}</td>
                                         <td className='py-2 border px-3'>{expense.amount}</td>
                                         <td className='flex items-center justify-center gap-x-3 py-2 border px-3'>
-                                            <SquarePen className='text-blue-500 cursor-pointer'></SquarePen>
-                                            <button onClick={() => handleDelete(expense.id)}>
-                                                <Trash2 className='text-red-500 cursor-pointer'></Trash2>
+                                            <button 
+                                                onClick={() => {
+                                                    setCurrentExpense(expense)
+                                                    setShowModal(true)
+                                                }} 
+                                                
+                                            >
+                                                <SquarePen className='text-blue-500 cursor-pointer'></SquarePen>
                                             </button>
+                                            <button onClick={() => handleDeleteClick(expense)}>
+                                                <Trash2 className='text-red-500 cursor-pointer' />
+                                            </button>
+
                                         </td>
                                     </tr>
                                 ))
@@ -229,7 +366,7 @@ const Expenses = () => {
                     <button
                         onClick={() => setCurrentPage(1)}
                         disabled={currentPage === 1}
-                        className="px-3 py-1 border rounded disabled:opacity-50"
+                        className="px-3 py-1 border rounded disabled:opacity-50 cursor-pointer"
                     >
                         First
                     </button>
@@ -241,7 +378,7 @@ const Expenses = () => {
                                 <button
                                     key={page}
                                     onClick={() => setCurrentPage(page)}
-                                    className={`w-8 h-8 border rounded ${
+                                    className={`w-8 h-8 border rounded cursor-pointer ${
                                     currentPage === page ? 'bg-pink-500 text-white' : ''
                                     }`}
                                 >
@@ -254,11 +391,145 @@ const Expenses = () => {
                     <button
                         onClick={() => setCurrentPage(totalPages)}
                         disabled={currentPage === totalPages}
-                        className="px-3 py-1 border rounded disabled:opacity-50"
+                        className="px-3 py-1 border rounded disabled:opacity-50 cursor-pointer"
                     >
                         Last
                     </button>
                 </div>
+
+                {showModal && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
+                        <div className="bg-white p-6 rounded-lg w-[400px]">
+                            <h2 className="text-lg font-semibold mb-3">
+                                {isEditing ? "Edit Expense" : "Add New Expense"}
+                            </h2>
+
+                            <div>
+                                <label>Expense</label>
+                                <input
+                                    type="text"
+                                    value={currentExpense.name}
+                                    onChange={(e) => setCurrentExpense({ ...currentExpense, name: e.target.value })}
+                                    className="border w-full mb-2 p-2 rounded"
+                                />
+                            </div>
+
+                            <div>
+                                <label>Category</label>
+                                <select
+                                    className="border w-full mb-2 p-2 rounded"
+                                    value={currentExpense.category?.id || currentExpense.category || ''}
+                                    onChange={(e) =>
+                                        setCurrentExpense({
+                                            ...currentExpense,
+                                            category: categories.find((cat) => cat.id === parseInt(e.target.value)),
+                                        })
+                                    }
+                                >
+                                    <option value="">Select Category</option>
+                                    {categories.map((cat) => (
+                                        <option key={cat.id} value={cat.id}>{cat.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div>
+                                <label>Description</label>
+                                <textarea
+                                    value={currentExpense.description}
+                                    onChange={(e) => setCurrentExpense({ ...currentExpense, description: e.target.value })}
+                                    className="border w-full mb-2 p-2 rounded"
+                                ></textarea>
+                            </div>
+
+                            <div>
+                                <label>Date</label>
+                                <input
+                                    type="date"
+                                    value={currentExpense.date}
+                                    onChange={(e) => setCurrentExpense({ ...currentExpense, date: e.target.value })}
+                                    className="border w-full mb-2 p-2 rounded"
+                                />
+                            </div>
+
+                            <div>
+                                <label>Amount</label>
+                                <input
+                                    type="number"
+                                    value={currentExpense.amount}
+                                    onChange={(e) => setCurrentExpense({ ...currentExpense, amount: e.target.value })}
+                                    className="border w-full mb-2 p-2 rounded"
+                                />
+                                {amountError && (
+                                    <p className="text-red-500 text-sm mt-1">{amountError}</p>
+                                )}
+                            </div>
+
+                            <div>
+                                <label>Budget</label>
+                                <select
+                                    className="border w-full mb-2 p-2 rounded"
+                                    value={currentExpense.budget?.id || currentExpense.budget || ''}
+                                    onChange={(e) =>
+                                        setCurrentExpense({
+                                            ...currentExpense,
+                                            budget: budgets.find((b) => b.id === parseInt(e.target.value)),
+                                        })
+                                    }
+                                >
+                                    <option value="">Select Budget</option>
+                                    {budgets.map((b) => (
+                                        <option key={b.id} value={b.id}>{b.limit_amount}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className="flex justify-end gap-3 mt-3">
+                                <button
+                                    onClick={() => setShowModal(false)}
+                                    className="px-3 py-1 border rounded cursor-pointer"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleSave}
+                                    className="px-3 py-1 bg-pink-500 text-white rounded cursor-pointer"
+                                >
+                                    Save
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {deleteTarget && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
+                        <div className="bg-white p-6 rounded-lg w-[350px]">
+                            <h2 className="text-lg font-semibold mb-4 text-center">
+                                Delete this expense?
+                            </h2>
+                            <p className="text-gray-600 text-center mb-4">
+                                “{deleteTarget.name}” will be permanently removed.
+                            </p>
+                            <div className="flex justify-end gap-3 mt-10">
+                                <button
+                                    onClick={() => setDeleteTarget(null)}
+                                    className="px-3 py-1 border rounded cursor-pointer"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={confirmDelete}
+                                    className="px-3 py-1 bg-red-500 text-white rounded cursor-pointer"
+                                >
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+
 
             </div>
         </section>
