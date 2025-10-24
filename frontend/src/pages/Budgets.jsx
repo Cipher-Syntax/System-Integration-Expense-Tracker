@@ -25,12 +25,17 @@ const Budgets = () => {
         try {
             const response = await api.get("api/budgets/");
             setBudgets(response.data);
+            console.log(response.data)
 
             const current = response.data.find(
-                (b) => today >= b.start_date && today <= b.end_date
+                (b) => b.status === "active"
             );
+
+            console.log(current)
             setActiveBudget(current || null);
             setExpenseTracker(current.limit_amount);
+            
+            
         } catch (err) {
             console.error("Failed to fetch budgets:", err);
         }
@@ -290,14 +295,14 @@ const Budgets = () => {
                                         </p>
 
                                         {
-                                            progressPercent >= 96 && progressPercent <= 99 ? (
+                                            !isFull && progressPercent >= 96 && progressPercent <= 99 ? (
                                                 <p className='text-[10px] text-center text-red-500 w-[300px] mx-auto'>You've' reached 96% of your budget</p>
                                             ) : (
                                                 ""
                                             )
                                         }
                                         {
-                                            progressPercent === 100 ? (
+                                            !isFull && progressPercent === 100 ? (
                                                 <p className='text-[10px] text-center text-red-500 w-[300px] mx-auto'>You've' already reached the maximum budget. Change to new budget</p>
                                             ) : (
                                                 ""

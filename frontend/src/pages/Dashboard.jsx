@@ -79,6 +79,7 @@ const Dashboard = () => {
                 const response = await api.get(`api/budgets/${selectedBudget}/available_balance/`)
                 console.log(response.data.remaining_balance)
                 setAvailableBalance(response.data.remaining_balance)
+                if(response.data.remaining_balance < 0) setAvailableBalance(0.00)
             }
             catch(error){
                 console.log('Failed to get available balance: ', error)

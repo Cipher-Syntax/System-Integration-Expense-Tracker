@@ -152,19 +152,10 @@ const Expenses = () => {
 
     const totalPages = Math.ceil(filteredExpenses.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
-    const currentExpenses = filteredExpenses.slice(startIndex, startIndex + itemsPerPage);
+    const sortedExpenses = filteredExpenses.slice().sort((a, b) => b.id - a.id);
 
-    const handleDelete = async (id) => {
-        const confirmDelete = window.confirm("Are you sure you want to delete this expense?");
-        if (!confirmDelete) return;
+    const currentExpenses = sortedExpenses.slice(startIndex, startIndex + itemsPerPage);
 
-        try {
-            await api.delete(`api/expenses/${id}/`);
-            setExpenses((prevExpenses) => prevExpenses.filter((expense) => expense.id !== id));
-        } catch (error) {
-            console.error("Failed to delete expense:", error);
-        }
-    };
 
     useEffect(() => {
         const fetchCategories = async () => {
@@ -329,7 +320,6 @@ const Expenses = () => {
                         {
                             currentExpenses.length > 0 ? (
                                 currentExpenses
-                                .reverse()
                                 .map((expense) => (
                                     <tr key={expense.id}>
                                         <td className='py-2 border px-3'>{expense.name.slice(0, 100) + "..."}</td>
@@ -478,9 +468,19 @@ const Expenses = () => {
                                     }
                                 >
                                     <option value="">Select Budget</option>
-                                    {budgets.map((b) => (
-                                        <option key={b.id} value={b.id}>{b.limit_amount}</option>
-                                    ))}
+                                    {
+                                        budgets.filter(b => b.status === "active").length > 0 ? (
+                                            budgets
+                                                .filter(b => b.status === "active")
+                                                .map((b) => (
+                                                    <option key={b.id} value={b.id}>
+                                                        ₱ {b.limit_amount}
+                                                    </option>
+                                                ))
+                                        ) : (
+                                            <option disabled>No active budgets yet</option>
+                                        )
+                                    }
                                 </select>
                             </div>
 
