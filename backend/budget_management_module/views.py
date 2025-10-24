@@ -22,8 +22,7 @@ class BudgetViewSet(viewsets.ModelViewSet):
 
         for budget in budgets:
             total_expenses = Expense.objects.filter(budget=budget).aggregate(total=models.Sum('amount'))['total'] or 0
-
-            # Check for full or expired status
+            
             if total_expenses >= budget.limit_amount:
                 budget.status = 'full'
             elif date.today() > budget.end_date:

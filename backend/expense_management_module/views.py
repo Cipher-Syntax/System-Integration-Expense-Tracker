@@ -11,7 +11,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
 class ExpenseviewSet(viewsets.ModelViewSet):
-    queryset = Expense.objects.all()
+    queryset = Expense.objects.all().order_by('-created_at')
     serializer_class = ExpenseSerializer
     permission_classes = [permissions.IsAuthenticated]
     

@@ -39,7 +39,7 @@ def get_remaining_budget(budget, user):
     return remaining_balance
 
 def get_total_expenses(user):
-    total_expenses = Expense.objects.filter(user=user).aggregate(
+    total_expenses = Expense.objects.filter(user=user, budget__status="active").aggregate(
         total=models.Sum('amount')
     )['total'] or Decimal('0.00')
     return total_expenses
