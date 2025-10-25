@@ -16,3 +16,13 @@ class Budget(models.Model):
     status = models.CharField(max_length=15, choices=STATUS_CHOICE, default="active")
     start_date = models.DateField()
     end_date = models.DateField()
+    
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            if self.status == "active":
+                Budget.objects.filter(user=self.user, status="active").update(status="expired")
+        super().save(*args, **kwargs)
+
+        
+    def __str__(self):
+        return f"{self.user} - {self.status} ({self.limit_amount})"

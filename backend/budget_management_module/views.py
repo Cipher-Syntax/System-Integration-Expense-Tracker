@@ -18,21 +18,24 @@ class BudgetViewSet(viewsets.ModelViewSet):
     #     return Budget.objects.filter(user=self.request.user)
     def get_queryset(self):
         user = self.request.user
-        budgets = Budget.objects.filter(user=user)
+        budgets = Budget.objects.filter(user=user).order_by('-start_date')
 
         for budget in budgets:
             total_expenses = Expense.objects.filter(budget=budget).aggregate(total=models.Sum('amount'))['total'] or 0
             
             if total_expenses >= budget.limit_amount:
-                budget.status = 'full'
+                if budget.status != 'full':
+                    budget.status = 'full'
+                    budget.save(update_fields=['status'])
             elif date.today() > budget.end_date:
-                budget.status = 'expired'
-            else:
-                budget.status = 'active'
-
-            budget.save(update_fields=['status'])
-
+                if budget.status != 'expired':
+                    budget.status = 'expired'
+                    budget.save(update_fields=['status'])
+            # Do NOT automatically make any budget 'active' here.
+            # Only budgets explicitly created as active remain active.
+            
         return budgets
+
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
