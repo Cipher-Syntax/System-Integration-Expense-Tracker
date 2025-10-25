@@ -19,33 +19,33 @@ const Budgets = () => {
         end_date: "",
     });
 
-    const today = new Date().toISOString().split("T")[0];
+    // const today = new Date().toISOString().split("T")[0];
 
     const fetchBudgets = async () => {
         try {
             const response = await api.get("api/budgets/");
+            // console.log(response.data);
             setBudgets(response.data);
-            console.log(response.data)
 
-            const current = response.data.find(
-                (b) => b.status === "active"
-            );
-
-            console.log(current)
+            const current = response.data.find((b) => b.status === "active");
+            console.log(current);
             setActiveBudget(current || null);
-            setExpenseTracker(current.limit_amount);
-            
-            
+            setExpenseTracker(current ? current.limit_amount : null);
         } catch (err) {
             console.error("Failed to fetch budgets:", err);
         }
     };
 
     useEffect(() => {
+        fetchBudgets();
+    }, []);
+
+
+    useEffect(() => {
         const fetchTotalExpenses = async () => {
             try{
                 const response = await api.get('api/budgets/total_expenses/');
-                console.log(response.data.total_expenses);
+                // console.log(response.data.total_expenses);
                 setTotalExpenses(response.data.total_expenses);
             }
             catch(error){
@@ -56,9 +56,7 @@ const Budgets = () => {
         fetchTotalExpenses()
     }, [])
 
-    useEffect(() => {
-        fetchBudgets();
-    }, []);
+   
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -71,31 +69,37 @@ const Budgets = () => {
 
         try {
             if (editingBudget) {
-                const res = await api.put(`api/budgets/${editingBudget.id}/`, formData);
-                setBudgets((prev) =>
-                    prev.map((b) => (b.id === editingBudget.id ? res.data : b))
-                );
-            } else {
-                const res = await api.post("api/budgets/", formData);
-                setBudgets((prev) => [...prev, res.data]);
+                await api.put(`api/budgets/${editingBudget.id}/`, formData);
+            } 
+            else {
+                await api.post("api/budgets/", formData);
             }
+            const response = await api.get("api/budgets/");
+            setBudgets(response.data);
+
+            const current = response.data.find((b) => b.status === "active");
+            setActiveBudget(current || null);
+            setExpenseTracker(current ? current.limit_amount : null);
 
             setShowModal(false);
             setEditingBudget(null);
             setFormData({ limit_amount: "", start_date: "", end_date: "" });
-            fetchBudgets();
-        } catch (err) {
+
+        } 
+        catch (err) {
             console.error("Error saving budget:", err.response?.data || err.message);
             setError("Failed to save. Check your data and try again.");
         }
     };
+
 
     const handleDelete = async (id) => {
         try {
             await api.delete(`api/budgets/${id}/`);
             setBudgets(budgets.filter((b) => b.id !== id));
             setActiveBudget(null);
-        } catch (err) {
+        } 
+        catch (err) {
             console.error("Failed to delete budget:", err);
         }
     };
@@ -112,7 +116,7 @@ const Budgets = () => {
 
     return (
         <section className="mt-26 max-w-7xl mx-auto px-4">
-            <h1 className="font-bold leading-relaxed tracking-widest text-2xl">Budgets</h1>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-pink-500 bg-clip-text text-transparent leading-relaxed tracking-widest">Budgets</h1>
 
             <div className="flex justify-between items-center mb-8 w-[1000px]">
                 <p className="text-gray-600 text-sm mt-1">
@@ -136,184 +140,145 @@ const Budgets = () => {
 
             </div>
 
-            {/* Grid Layout */}
             {budgets.length ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {budgets.map((b) => {
-                        const isActive = today >= b.start_date && today <= b.end_date;
-                        const status = b.status.charAt(0).toUpperCase() + b.status.slice(1);
+                        const isActive = b.status === "active";
                         const isFull = b.status === "full";
+                        const isExpired = b.status === "expired";
+                        const status = b.status.charAt(0).toUpperCase() + b.status.slice(1);
+
+                    // Determine progress percent only for active budget
+                        const currentProgress = isActive ? progressPercent : 100;
 
                         return (
                             <div
                                 key={b.id}
                                 className={`rounded-xl shadow-md overflow-hidden transition-shadow duration-300 border-2 ${
-                                    isFull
-                                        ? "bg-gray-100 border-gray-300 opacity-70 cursor-not-allowed"
-                                        : isActive
-                                        ? "bg-white border-pink-500 hover:shadow-xl"
-                                        : "bg-white border-gray-200 hover:shadow-xl"
+                                    isExpired
+                                    ? "bg-gray-100 border-gray-300 opacity-70 cursor-not-allowed"
+                                    : isFull
+                                    ? "bg-gray-100 border-gray-300 opacity-70 cursor-not-allowed"
+                                    : isActive
+                                    ? "bg-white border-pink-500 hover:shadow-xl"
+                                    : "bg-white border-gray-200 hover:shadow-xl"
                                 }`}
                             >
-                                {/* Header with Actions */}
                                 <div
                                     className={`p-4 flex justify-between items-center ${
-                                        isFull
-                                            ? "bg-gray-200"
-                                            : "bg-gradient-to-r from-pink-50 to-purple-50"
+                                    isExpired || isFull
+                                        ? "bg-gray-200"
+                                        : "bg-gradient-to-r from-pink-50 to-purple-50"
                                     }`}
                                 >
                                     <span
                                         className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                                            isFull
-                                                ? "bg-gray-300 text-gray-600"
-                                                : isActive
-                                                ? "bg-green-100 text-green-700"
-                                                : "bg-gray-100 text-gray-600"
+                                            isExpired || isFull
+                                            ? "bg-gray-300 text-gray-600"
+                                            : isActive
+                                            ? "bg-green-100 text-green-700"
+                                            : "bg-gray-100 text-gray-600"
                                         }`}
                                     >
                                         {status}
                                     </span>
-                                    <div className="flex gap-3">
-                                        <Edit2
-                                            className={`w-5 h-5 ${
-                                                isFull
-                                                    ? "text-gray-400 cursor-not-allowed"
-                                                    : isActive
-                                                    ? "text-gray-400 cursor-not-allowed"
-                                                    : "text-blue-500 cursor-pointer hover:text-blue-700 transition-colors"
-                                            }`}
-                                            onClick={() =>
-                                                !isFull && !isActive && openEditModal(b)
-                                            }
-                                        />
-                                        <Trash2
-                                            className='w-5 h-5 text-red-500 cursor-pointer hover:text-red-700 transition-colors"
-                                            '
-                                            onClick={() =>
-                                                handleDelete(b.id)
-                                            }
-                                        />
+
+                                <div className="flex gap-3">
+                                    <Edit2
+                                        className={`w-5 h-5 ${
+                                        isExpired || isFull
+                                            ? "text-gray-400 cursor-not-allowed"
+                                            : "text-blue-500 cursor-pointer hover:text-blue-700 transition-colors"
+                                        }`}
+                                        onClick={() => !isExpired && !isFull && openEditModal(b)}
+                                    />
+                                    <Trash2
+                                        className="w-5 h-5 text-red-500 cursor-pointer hover:text-red-700 transition-colors"
+                                        onClick={() => handleDelete(b.id)}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Content */}
+                            <div className="p-6 space-y-4">
+                                <div className="text-center pb-4 border-b border-gray-200">
+                                    <p className={`text-sm mb-1 ${isExpired || isFull ? "text-gray-400" : "text-gray-500"}`}>
+                                        Limit Amount
+                                    </p>
+                                    <p className={`text-3xl font-bold ${isExpired || isFull ? "text-gray-400" : "text-pink-600"}`}>
+                                        ₱{parseFloat(b.limit_amount).toLocaleString()}
+                                    </p>
+                                </div>
+
+                                <div className="space-y-3">
+                                    <div className="flex justify-between items-center">
+                                        <span className={`text-sm ${isExpired || isFull ? "text-gray-400" : "text-gray-500"}`}>
+                                            Start Date
+                                        </span>
+                                        <span className={`text-sm font-semibold ${isExpired || isFull ? "text-gray-400" : "text-gray-700"}`}>
+                                            {new Date(b.start_date).toLocaleDateString("en-US", {
+                                                month: "short",
+                                                day: "numeric",
+                                                year: "numeric",
+                                            })}
+                                        </span>
+                                    </div>
+
+                                    <div className="flex justify-between items-center">
+                                        <span className={`text-sm ${isExpired || isFull ? "text-gray-400" : "text-gray-500"}`}>
+                                            End Date
+                                        </span>
+                                        <span className={`text-sm font-semibold ${isExpired || isFull ? "text-gray-400" : "text-gray-700"}`}>
+                                            {new Date(b.end_date).toLocaleDateString("en-US", {
+                                                month: "short",
+                                                day: "numeric",
+                                                year: "numeric",
+                                            })}
+                                        </span>
                                     </div>
                                 </div>
 
-                                {/* Card Content */}
-                                <div className="p-6 space-y-4">
-                                    <div className="text-center pb-4 border-b border-gray-200">
-                                        <p
-                                            className={`text-sm mb-1 ${
-                                                isFull ? "text-gray-400" : "text-gray-500"
+                                {/* Expense Tracker */}
+                                <div className="w-full mt-8">
+                                    <h2 className={`mb-2 text-[14px] ${isExpired || isFull ? "text-gray-400" : "text-gray-500"}`}>
+                                        Expense Tracker
+                                    </h2>
+                                    <div className="w-full rounded-full h-3 overflow-hidden border border-gray-300 relative">
+                                        <div
+                                            className={`h-full rounded-full transition-all duration-700 ease-in-out ${
+                                                isExpired || isFull
+                                                ? "bg-gray-400"
+                                                : currentProgress < 70
+                                                ? "bg-green-500"
+                                                : currentProgress < 90
+                                                ? "bg-yellow-500"
+                                                : "bg-red-500"
                                             }`}
+                                            style={{
+                                                width: `${currentProgress}%`,
+                                            }}
                                         >
-                                            Limit Amount
-                                        </p>
-                                        <p
-                                            className={`text-3xl font-bold ${
-                                                isFull ? "text-gray-400" : "text-pink-600"
-                                            }`}
-                                        >
-                                            ₱{parseFloat(b.limit_amount).toLocaleString()}
-                                        </p>
-                                    </div>
-
-                                    <div className="space-y-3">
-                                        <div className="flex justify-between items-center">
-                                            <span
-                                                className={`text-sm ${
-                                                    isFull ? "text-gray-400" : "text-gray-500"
-                                                }`}
-                                            >
-                                                Start Date
-                                            </span>
-                                            <span
-                                                className={`text-sm font-semibold ${
-                                                    isFull ? "text-gray-400" : "text-gray-700"
-                                                }`}
-                                            >
-                                                {new Date(b.start_date).toLocaleDateString("en-US", {
-                                                    month: "short",
-                                                    day: "numeric",
-                                                    year: "numeric",
-                                                })}
-                                            </span>
-                                        </div>
-
-                                        <div className="flex justify-between items-center">
-                                            <span
-                                                className={`text-sm ${
-                                                    isFull ? "text-gray-400" : "text-gray-500"
-                                                }`}
-                                            >
-                                                End Date
-                                            </span>
-                                            <span
-                                                className={`text-sm font-semibold ${
-                                                    isFull ? "text-gray-400" : "text-gray-700"
-                                                }`}
-                                            >
-                                                {new Date(b.end_date).toLocaleDateString("en-US", {
-                                                    month: "short",
-                                                    day: "numeric",
-                                                    year: "numeric",
-                                                })}
-                                            </span>
                                         </div>
                                     </div>
-
-                                    <div className="w-full mt-8">
-                                        <h2
-                                            className={`mb-2 text-[14px] ${
-                                                isFull ? "text-gray-400" : "text-gray-500"
-                                            }`}
-                                        >
-                                            Expense Tracker
-                                        </h2>
-                                        <div className="w-full rounded-full h-3 overflow-hidden border border-gray-300 relative">
-                                            <div
-                                                className={`h-full rounded-full transition-all duration-700 ease-in-out ${
-                                                    isFull
-                                                        ? "bg-gray-400"
-                                                        : progressPercent < 70
-                                                        ? "bg-green-500"
-                                                        : progressPercent < 90
-                                                        ? "bg-yellow-500"
-                                                        : "bg-red-500"
-                                                }`}
-                                                style={{
-                                                    width: `${isFull ? 100 : progressPercent}%`,
-                                                }}
-                                            ></div>
-                                        </div>
-                                        <p
-                                            className={`text-sm mt-1 text-right ${
-                                                isFull ? "text-gray-400" : "text-gray-600"
-                                            }`}
-                                        >
-                                            {isFull
-                                                ? "100%"
-                                                : `${progressPercent.toFixed(1)}%`}
+                                        <p className={`text-sm mt-1 text-right ${isExpired || isFull ? "text-gray-400" : "text-gray-600"}`}>
+                                            {isExpired || isFull ? "100%" : `${currentProgress.toFixed(1)}%`}
                                         </p>
 
-                                        {
-                                            !isFull && progressPercent >= 96 && progressPercent <= 99 ? (
-                                                <p className='text-[10px] text-center text-red-500 w-[300px] mx-auto'>You've' reached 96% of your budget</p>
-                                            ) : (
-                                                ""
-                                            )
-                                        }
-                                        {
-                                            !isFull && progressPercent === 100 ? (
-                                                <p className='text-[10px] text-center text-red-500 w-[300px] mx-auto'>You've' already reached the maximum budget. Change to new budget</p>
-                                            ) : (
-                                                ""
-                                            )
-                                        }         
+                                        {isActive || !isActive && currentProgress >= 96 && currentProgress < 100 && (
+                                            <p className={`text-[10px] text-center w-[300px] mx-auto ${isExpired || isFull ? "text-gray-400" : "text-red-500 "}`}>
+                                                You've reached 96% of your budget
+                                            </p>
+                                        )}
+                                        {isActive || !isActive && currentProgress === 100 && (
+                                            <p className={`text-[10px] text-center w-[300px] mx-auto ${isExpired || isFull ? "text-gray-400" : "text-red-500 "}`}>
+                                                You've already reached the maximum budget. Change to new budget
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
                             </div>
                         );
                     })}
-
                 </div>
             ) : (
                 <div className="bg-white rounded-xl shadow-md p-12 text-center">
@@ -329,7 +294,8 @@ const Budgets = () => {
                 </div>
             )}
 
-            {/* Modal */}
+
+            {/* Modal For Creating and Editing */}
             {showModal && (
                 <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
                     <div className="bg-white rounded-xl p-8 w-[400px] shadow-2xl">

@@ -6,6 +6,7 @@ import NotFound from "./NotFound";
 import ForgotPassword from "./ForgotPassword";
 import Expenses from "./Expenses";
 import Budgets from './Budgets';
+import Reports from "./Reports";
 
 export {
     Layout,
@@ -15,5 +16,6 @@ export {
     NotFound,
     ForgotPassword,
     Expenses,
-    Budgets
+    Budgets,
+    Reports,
 }

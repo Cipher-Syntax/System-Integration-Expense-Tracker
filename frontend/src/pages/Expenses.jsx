@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, Funnel, SquarePen, Trash2    } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import api from '../api/api';
+import { encryptId } from '../utils/CryptoUtils';
 
 const Expenses = () => {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -78,8 +79,7 @@ const Expenses = () => {
             }
 
 
-            const formattedDate = currentExpense.date ? new Date(currentExpense.date).toISOString().split("T")[0]
-            : null;
+            const formattedDate = currentExpense.date ? new Date(currentExpense.date).toISOString().split("T")[0] : null;
 
             const payload = {
                 name: currentExpense.name,
@@ -156,6 +156,27 @@ const Expenses = () => {
 
     const currentExpenses = sortedExpenses.slice(startIndex, startIndex + itemsPerPage);
 
+    const [newCategory, setNewCategory] = useState(null);
+    const [openModalForNewCategory, setOpenModalForNewCategory] =  useState(false);
+
+    const addNewCategory = async () => {
+        try {
+            const response = await api.post('api/categories/', {
+                name: newCategory,
+            });
+            setCategories((prev) => [...prev, response.data]);
+            setCurrentExpense((prev) => ({
+                ...prev,
+                category: response.data,
+            }));
+            setOpenModalForNewCategory(false);
+            setNewCategory('');
+        } 
+        catch (error) {
+            console.error('Failed to create category:', error);
+        }
+    }
+
 
     useEffect(() => {
         const fetchCategories = async () => {
@@ -190,11 +211,29 @@ const Expenses = () => {
 
         fetchBudgets()
     }, [])
-
     
+    const closeModal = () => {
+        const params = new URLSearchParams(searchParams);
+        params.delete('edit');
+        setSearchParams(params);
+        setShowModal(false);
+    };
+
+    useEffect(() => {
+        const editId = searchParams.get('edit');
+        if (editId && expenses.length > 0) {
+            const expenseToEdit = expenses.find(exp => exp.id === parseInt(editId));
+            if (expenseToEdit) {
+            setCurrentExpense(expenseToEdit);
+            setShowModal(true);
+            }
+        }
+    }, [searchParams, expenses]);
+
+
     return (
         <section className='mt-26'>
-            <h1 className='font-bold leading-relaxed tracking-widest text-2xl'>Expenses</h1>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-pink-500 bg-clip-text text-transparent leading-relaxed tracking-widest">Expenses</h1>
 
             <div className='w-[1000px] mx-auto my-15'>
                 <div className='relative w-[900px] mx-auto'>
@@ -322,17 +361,21 @@ const Expenses = () => {
                                 currentExpenses
                                 .map((expense) => (
                                     <tr key={expense.id}>
-                                        <td className='py-2 border px-3'>{expense.name.slice(0, 100) + "..."}</td>
+                                        <td className='py-2 border px-3'>{expense.name}</td>
                                         <td className='py-2 border px-3'>{expense.category.name}</td>
-                                        <td className='py-2 border px-3'>{expense.description ? expense.description.slice(0, 150) + "..." : "-"}</td>
+                                        <td className='py-2 border px-3'>{expense.description ? expense.description : "-"}</td>
                                         <td className='py-2 border px-3'>{expense.date}</td>
                                         <td className='py-2 border px-3'>{expense.amount}</td>
                                         <td className='flex items-center justify-center gap-x-3 py-2 border px-3'>
                                             <button 
                                                 onClick={() => {
-                                                    setCurrentExpense(expense)
-                                                    setShowModal(true)
-                                                }} 
+                                                    const params = new URLSearchParams(searchParams);
+                                                    params.set('edit', encryptId(expense.id));
+                                                    setSearchParams(params);
+                                                    setCurrentExpense(expense);
+                                                    setShowModal(true);
+                                                }}
+
                                                 
                                             >
                                                 <SquarePen className='text-blue-500 cursor-pointer'></SquarePen>
@@ -409,19 +452,64 @@ const Expenses = () => {
                                 <select
                                     className="border w-full mb-2 p-2 rounded"
                                     value={currentExpense.category?.id || currentExpense.category || ''}
-                                    onChange={(e) =>
-                                        setCurrentExpense({
-                                            ...currentExpense,
-                                            category: categories.find((cat) => cat.id === parseInt(e.target.value)),
-                                        })
-                                    }
+                                    onChange={(e) => {
+                                        const selectedValue = e.target.value;
+
+                                        if (selectedValue === "new-category"){
+                                            setOpenModalForNewCategory(true);
+                                        }
+                                        else{
+                                            const selectedCategory = categories.find((cat) => cat.id === parseInt(selectedValue))
+                                            setCurrentExpense({
+                                                ...currentExpense,
+                                                category: selectedCategory || '',
+                                            })
+                                        }
+
+                                    }}
                                 >
                                     <option value="">Select Category</option>
                                     {categories.map((cat) => (
                                         <option key={cat.id} value={cat.id}>{cat.name}</option>
                                     ))}
+                                    <option value="new-category">Create New Category</option>
                                 </select>
                             </div>
+
+                            {openModalForNewCategory && (
+                                <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
+                                    <div className="bg-white p-6 rounded-lg w-[350px]">
+                                        <h2 className="text-lg font-semibold mb-4 text-center">
+                                            Create New Category
+                                        </h2>
+                                        <input
+                                            type="text"
+                                            placeholder="Category name"
+                                            value={newCategory || ''}
+                                            onChange={(e) => setNewCategory(e.target.value)}
+                                            className="border w-full mb-4 p-2 rounded"
+                                        />
+                                        <div className="flex justify-end gap-3">
+                                            <button
+                                            onClick={() => {
+                                                setOpenModalForNewCategory(false);
+                                                setNewCategory('');
+                                            }}
+                                            className="px-3 py-1 border rounded cursor-pointer"
+                                            >
+                                            Cancel
+                                            </button>
+                                            <button
+                                                onClick={addNewCategory}
+                                            className="px-3 py-1 bg-pink-500 text-white rounded cursor-pointer"
+                                            >
+                                                Save
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                )}
+
 
                             <div>
                                 <label>Description</label>
@@ -486,7 +574,7 @@ const Expenses = () => {
 
                             <div className="flex justify-end gap-3 mt-3">
                                 <button
-                                    onClick={() => setShowModal(false)}
+                                    onClick={closeModal}
                                     className="px-3 py-1 border rounded cursor-pointer"
                                 >
                                     Cancel

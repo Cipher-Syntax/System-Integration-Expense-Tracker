@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import api from '../api/api'
 import { Area, AreaChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Dashboard = () => {
     const [availableBalance, setAvailableBalance] = useState(null);
@@ -13,7 +14,9 @@ const Dashboard = () => {
     const [expenses, setExpenses] = useState([]);
     const [filter, setFilter] = useState('day');
 
-    const progressPercent = expenseTracker ? Math.min((totalExpenses / expenseTracker) * 100, 100) : 0;
+    // const progressPercent = expenseTracker ? Math.min((totalExpenses / expenseTracker) * 100, 100) : 0;
+    const progressPercent = expenseTracker ? Math.min(((expenseTracker - availableBalance) / expenseTracker) * 100, 100) : 0;
+
 
     const getFilteredData = () => {
         if (!chartData.length) return [];
@@ -54,12 +57,10 @@ const Dashboard = () => {
             try{
                 const response = await api.get('api/budgets/');
                 if(response.data.length > 0){
-                    const latest = response.data[response.data.length - 1]
-                    console.log(latest.id)
-                    setSelectedBudget(latest.id)
-                    setExpenseTracker(latest.limit_amount)
-                    setBudget(latest.limit_amount);
-                    console.log(latest.limit_amount);
+                    const active = response.data.find(b => b.status === "active") || response.data[response.data.length - 1];
+                    setSelectedBudget(active.id);
+                    setExpenseTracker(active.limit_amount);
+                    setBudget(active.limit_amount);
                 }
             }
             catch(error){
@@ -106,38 +107,36 @@ const Dashboard = () => {
 
     useEffect(() => {
         const fetchExpenses = async () => {
-            try{
+            if (!selectedBudget) return;
+            try {
                 const response = await api.get('api/expenses/');
-                const data = response.data
+                const filtered = response.data.filter(exp => exp.budget === selectedBudget);
 
                 const dailyTotals = {};
-
-                data.forEach((expense) => {
+                filtered.forEach(expense => {
                     const date = expense.date;
                     dailyTotals[date] = (dailyTotals[date] || 0) + parseFloat(expense.amount);
                 });
 
-                const formattedDate = Object.entries(dailyTotals).map(([date, amount]) => ({
-                    date,
-                    amount,
-                })).sort((a, b) => new Date(a.date) - new Date(b.date));
+                const formattedData = Object.entries(dailyTotals)
+                    .map(([date, amount]) => ({ date, amount }))
+                    .sort((a, b) => new Date(a.date) - new Date(b.date));
 
-                setChartData(formattedDate);
-                setExpenses(data);
-                console.log(data);
+                setChartData(formattedData);
+                setExpenses(filtered);
+            } catch (error) {
+                console.log('Failed to get expenses:', error);
             }
-            catch(error){
-                console.log('Failed to get expenses: ', error)
-            }
-        }
+        };
 
-        fetchExpenses()
-    }, [])
+        fetchExpenses();
+    }, [selectedBudget]);
+
 
 
     return (
         <section className='mt-26'>
-            <h1 className='font-bold leading-relaxed tracking-widest text-2xl'>DASHBOARD</h1>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-pink-500 bg-clip-text text-transparent leading-relaxed tracking-widest">DASHBOARD</h1>
 
             <div className='flex justify-center-safe items-center-safe gap-x-20'>
                 <div className='flex flex-col'>
@@ -223,38 +222,38 @@ const Dashboard = () => {
                     </div>
                     {chartData.length > 0 ? (
                         <div className="flex-1 min-h-[200px] min-w-[200px]">
-                        <ResponsiveContainer width="95%" height="90%">
-                            <AreaChart
-                                data={filteredData}
-                                margin={{ top: 10, right: 20, left: 0, bottom: 10 }}
-                            >
-                            <defs>
-                                <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stopColor="#F844CE" stopOpacity={0.4} />
-                                <stop offset="100%" stopColor="#F844CE" stopOpacity={0.05} />
-                                </linearGradient>
-                            </defs>
+                            <ResponsiveContainer width="95%" height="90%">
+                                <AreaChart
+                                    data={filteredData}
+                                    margin={{ top: 10, right: 20, left: 0, bottom: 10 }}
+                                >
+                                <defs>
+                                    <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stopColor="#F844CE" stopOpacity={0.4} />
+                                    <stop offset="100%" stopColor="#F844CE" stopOpacity={0.05} />
+                                    </linearGradient>
+                                </defs>
 
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-                            <YAxis tick={{ fontSize: 12 }} />
-                            <Tooltip
-                                formatter={(value) =>
-                                `₱${parseFloat(value).toLocaleString('en-PH', {
-                                    minimumFractionDigits: 2,
-                                })}`
-                                }
-                            />
-                            <Area
-                                type="monotone"
-                                dataKey="amount"
-                                stroke="#F844CE"
-                                fill="url(#colorExpense)"
-                                strokeWidth={2}
-                                activeDot={{ r: 5 }}
-                            />
-                            </AreaChart>
-                        </ResponsiveContainer>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+                                <YAxis tick={{ fontSize: 12 }} />
+                                <Tooltip
+                                    formatter={(value) =>
+                                    `₱${parseFloat(value).toLocaleString('en-PH', {
+                                        minimumFractionDigits: 2,
+                                    })}`
+                                    }
+                                />
+                                <Area
+                                    type="monotone"
+                                    dataKey="amount"
+                                    stroke="#F844CE"
+                                    fill="url(#colorExpense)"
+                                    strokeWidth={2}
+                                    activeDot={{ r: 5 }}
+                                />
+                                </AreaChart>
+                            </ResponsiveContainer>
                         </div>
                     ) : (
                         <p className="text-gray-500 text-center mt-12">No Chart To Show Yet</p>
@@ -264,7 +263,7 @@ const Dashboard = () => {
 
             {/* Recent Expenses & Monthly Expenses */}
             <div className='flex items-left justify-left gap-x-20 mt-20 mb-10'>
-                <div className='w-[480px]'>
+                <Link to="/expenses" className='w-[480px]'>
                     <h2>Recent Expenses</h2>
                     {
                         expenses
@@ -289,7 +288,7 @@ const Dashboard = () => {
                         ))
                     }
 
-                </div>
+                </Link>
                 {/* Monthly Expenses */}
                 <div className="w-[500px]">
                     <h2 className="text-gray-700 font-semibold mb-4">Monthly Expenses</h2>

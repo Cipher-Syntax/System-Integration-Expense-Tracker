@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { Layout, Dashboard, Login, Register, NotFound, ForgotPassword, Expenses, Budgets } from './pages';
+import { Layout, Dashboard, Login, Register, NotFound, ForgotPassword, Expenses, Budgets, Reports } from './pages';
 import { ProtectedRoute } from './components';
 
 const App = () => {
@@ -27,6 +27,7 @@ const App = () => {
                         </Route>
                         <Route path='/expenses' element={<Expenses></Expenses>}></Route>
                         <Route path='/budgets' element={<Budgets></Budgets>}></Route>
+                        <Route path='/reports' element={<Reports></Reports>}></Route>
                     </Route>
                 </Routes>
             </BrowserRouter>
