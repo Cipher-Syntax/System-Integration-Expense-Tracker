@@ -7,6 +7,7 @@ import ForgotPassword from "./ForgotPassword";
 import Expenses from "./Expenses";
 import Budgets from './Budgets';
 import Reports from "./Reports";
+import Settings from "./Settings";
 
 export {
     Layout,
@@ -18,4 +19,5 @@ export {
     Expenses,
     Budgets,
     Reports,
+    Settings,
 }
