@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
-import { User, Mail, Phone, Bell, Lock, Save, AlertCircle, CheckCircle, Eye, EyeOff, CircleUser, SquarePen, Trash2 } from "lucide-react";
+import { Mail, Phone, Bell, CheckCircle, CircleUser, SquarePen, Trash2  } from "lucide-react";
 import api from '../api/api';
+import { useNavigate } from 'react-router-dom'
 
 const Settings = () => {
     const [username, setUsername] = useState("");
@@ -13,8 +14,61 @@ const Settings = () => {
     const [emailNotif, setEmailNotif] = useState(true);
     const [smsNotif, setSmsNotif] = useState(true);
     const [budgetAlert, setBudgetAlert] = useState(true);
-    const [message, setMessage] = useState('');
+    const [message, setMessage] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
 
+    const navigate = useNavigate()
+
+    const handleSave = async () => {
+        try {
+            const payload = {
+                username,
+                phone_number: phoneNumber,
+                email
+            };
+            const response = await api.patch('api/profile/', payload);
+            console.log('User updated:', response.data);
+            setIsEditModal(false);
+            setUserData(response.data);
+
+            setMessage(true);
+            const timer = setTimeout(() => {
+                setMessage(false);
+            }, 2000)
+
+            return () => clearTimeout(timer)
+        } 
+        catch (error) {
+            console.error('Failed to update profile:', error);
+        }
+    };
+
+    const handlePreferenceSave = async () => {
+        try {
+            const payload = {
+                email_notification: emailNotif,
+                sms_notification: smsNotif,
+                budget_alerts: budgetAlert,
+            };
+            const response = await api.patch('api/profile/', payload);
+            console.log('Preferences updated:', response.data);
+
+            setMessage(true);
+            const timer = setTimeout(() => {
+                setMessage(false);
+            }, 2000)
+
+            return () => clearTimeout(timer)
+        } 
+        catch (error) {
+            console.error('Failed to save preferences:', error);
+        }
+    };
+
+    const handleDelete = async () => {
+        await api.delete('api/user/');
+        navigate('/login')
+    }
 
     useEffect(()  => {
         try{
@@ -40,54 +94,6 @@ const Settings = () => {
         }
     }, [])
 
-    const handleSave = async () => {
-        try {
-            const payload = {
-                username,
-                phone_number: phoneNumber,
-                email
-            };
-            const response = await api.patch('api/profile/', payload);
-            console.log('User updated:', response.data);
-            setIsEditModal(false);
-            setUserData(response.data);
-
-            setMessage('Updated Successfully');
-            const timer = setTimeout(() => {
-                setMessage('');
-            }, 2000)
-
-            return () => clearTimeout(timer)
-        } 
-        catch (error) {
-            console.error('Failed to update profile:', error);
-        }
-    };
-
-    const handlePreferenceSave = async () => {
-        try {
-            const payload = {
-                email_notification: emailNotif,
-                sms_notification: smsNotif,
-                budget_alerts: budgetAlert,
-            };
-            const response = await api.patch('api/profile/', payload);
-            console.log('Preferences updated:', response.data);
-
-            setMessage('Updated Successfully');
-            const timer = setTimeout(() => {
-                setMessage('');
-            }, 2000)
-
-            return () => clearTimeout(timer)
-        } 
-        catch (error) {
-            console.error('Failed to save preferences:', error);
-        }
-    };
-
-
-    
 
     return (
         <section className="mt-26 max-w-7xl mx-auto px-4">
@@ -263,18 +269,52 @@ const Settings = () => {
                         </div>
                     </div>
 
-                    {
-                        message && (
-                            <p className='text-center text-green-500'>{message}</p>
-                        )
-                    }
+                    {message && (
+                        <div className='fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
+                                        bg-green-500 w-16 h-16 rounded-full flex items-center justify-center 
+                                        shadow-lg animate-slide-down z-50'>
+                            <CheckCircle className='text-white w-8 h-8' />
+                        </div>
+                    )}
 
                     <h2 className='font-bold leading-relaxed tracking-wider text-2xl text-gray-500 mt-10'>Account Management</h2>
 
-                    <div className='flex items-center mt-3 gap-x-2'>
+                    <div className='flex items-center mt-3 gap-x-2' onClick={() => setShowDeleteModal(true)}>
                         <Trash2 className='text-red-500'></Trash2>
                         <p className='text-red-500 font-bold leading-relaxed tracking-widest cursor-pointer'>Delete Account</p>
                     </div>
+
+                    {
+                        showDeleteModal && (
+                            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                                <div className="bg-white p-6 rounded-2xl w-[350px] shadow-lg">
+                                    <h2 className="text-xl font-bold text-gray-800 mb-3">Confirm Deletion</h2>
+                                    <p className="text-gray-600 text-sm mb-6">
+                                        Are you sure you want to permanently delete your account? 
+                                        This action cannot be undone.
+                                    </p>
+
+                                    <div className="flex justify-end gap-3">
+                                        <button
+                                            onClick={() => setShowDeleteModal(false)}
+                                            className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 text-gray-800"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            onClick={async () => {
+                                                await handleDelete();
+                                                setShowDeleteModal(false);
+                                            }}
+                                            className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )
+                    }
                 </div>
             </div>
 
