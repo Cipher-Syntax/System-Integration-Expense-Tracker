@@ -1,4 +1,4 @@
-from twilio.rest import Client  # type: ignore
+from twilio.rest import Client #type: ignore
 from django.conf import settings
 from django.core.mail import send_mail
 
@@ -23,10 +23,22 @@ def send_email_notification(subject, message, receiver):
         return False
 
 
+def format_phone_number(phone_number: str) -> str:
+    phone_number = phone_number.strip().replace(" ", "").replace("-", "")
+
+    if phone_number.startswith("0"):
+        phone_number = "+63" + phone_number[1:]
+    elif phone_number.startswith("63"):
+        phone_number = "+" + phone_number
+    elif not phone_number.startswith("+"):
+        phone_number = "+" + phone_number
+
+    return phone_number
+
+
 def send_sms_notification(phone_number, message):
     try:
-        if not str(phone_number).startswith('+'):
-            phone_number = f"+{phone_number}"
+        phone_number = format_phone_number(phone_number)
 
         client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
         client.messages.create(
