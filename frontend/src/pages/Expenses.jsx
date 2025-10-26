@@ -365,7 +365,7 @@ const Expenses = () => {
                                         <td className='py-2 border px-3'>{expense.category.name}</td>
                                         <td className='py-2 border px-3'>{expense.description ? expense.description : "-"}</td>
                                         <td className='py-2 border px-3'>{expense.date}</td>
-                                        <td className='py-2 border px-3'>{expense.amount}</td>
+                                        <td className='py-2 border px-3'>{Number(expense.amount).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                                         <td className='flex items-center justify-center gap-x-3 py-2 border px-3'>
                                             <button 
                                                 onClick={() => {
@@ -562,7 +562,7 @@ const Expenses = () => {
                                                 .filter(b => b.status === "active")
                                                 .map((b) => (
                                                     <option key={b.id} value={b.id}>
-                                                        ₱ {b.limit_amount}
+                                                        ₱ {Number(b.limit_amount).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                                     </option>
                                                 ))
                                         ) : (
