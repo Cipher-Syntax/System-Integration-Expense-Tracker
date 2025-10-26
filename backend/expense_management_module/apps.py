@@ -6,4 +6,4 @@ class ExpenseManagementModuleConfig(AppConfig):
     name = 'expense_management_module'
 
     def ready(self):
-        import expense_management_module.models
+        import expense_management_module.signals

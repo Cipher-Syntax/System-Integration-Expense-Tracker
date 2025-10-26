@@ -4,5 +4,8 @@ from django.contrib.auth.models import AbstractUser
 # Create your models here.
 class User(AbstractUser):
     phone_number = models.CharField(max_length=15, null=False, blank=False)
+    email_notification = models.BooleanField(default=True)
+    sms_notification = models.BooleanField(default=True)
+    budget_alerts = models.BooleanField(default=True)
 
 

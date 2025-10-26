@@ -9,7 +9,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'password', 'confirm_password', 'phone_number']
+        fields = ['id', 'username', 'email', 'password', 'confirm_password', 'phone_number', 'email_notification', 'sms_notification', 'budget_alerts']
 
     def validate_username(self, value):
         queryset = User.objects.filter(username=value)
