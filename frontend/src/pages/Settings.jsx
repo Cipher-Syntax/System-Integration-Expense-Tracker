@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import { Mail, Phone, Bell, CheckCircle, CircleUser, SquarePen, Trash2  } from "lucide-react";
 import api from '../api/api';
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom';
+import { useFetchProfile } from '../hooks';
 
 const Settings = () => {
+    // const { user } = useFetchProfile();
+    const { fetchProfile, loading, error } = useFetchProfile()
+
     const [username, setUsername] = useState("");
     const [phoneNumber, setPhoneNumber] = useState(null);
     const [email, setEmail] = useState("");
@@ -70,29 +74,50 @@ const Settings = () => {
         navigate('/login')
     }
 
-    useEffect(()  => {
-        try{
-            const fetchUserData = async () => {
-                const response = await api.get('api/profile/');
-                const data = response.data
-                console.log(data);
-                setUserData(data);
-                setUsername(data.username)
-                setPhoneNumber(data.phone_number)
-                setEmail(data.email)
+    
+    
+    useEffect(() => {
+        const getUserProfile = async () => {
+            const data = await fetchProfile();
+            setUserData(data);
+            setUsername(data.username)
+            setPhoneNumber(data.phone_number)
+            setEmail(data.email)
 
-                setEmailNotif(data.email_notification)
-                setSmsNotif(data.sms_notification)
-                setBudgetAlert(data.budget_alerts)
-            }
-
-            fetchUserData();
-
+            setEmailNotif(data.email_notification)
+            setSmsNotif(data.sms_notification)
+            setBudgetAlert(data.budget_alerts)
         }
-        catch(error){
-            console.log('Failed to get user data: ', error)
-        }
+
+        getUserProfile();
     }, [])
+
+    if (loading) return <p>Loading...</p>;
+    if (error) return <p>Failed to load profile</p>;
+
+    // useEffect(()  => {
+    //     try{
+    //         const fetchUserData = async () => {
+    //             const response = await api.get('api/profile/');
+    //             const data = response.data
+    //             console.log(data);
+    //             setUserData(data);
+    //             setUsername(data.username)
+    //             setPhoneNumber(data.phone_number)
+    //             setEmail(data.email)
+
+    //             setEmailNotif(data.email_notification)
+    //             setSmsNotif(data.sms_notification)
+    //             setBudgetAlert(data.budget_alerts)
+    //         }
+
+    //         fetchUserData();
+
+    //     }
+    //     catch(error){
+    //         console.log('Failed to get user data: ', error)
+    //     }
+    // }, [])
 
 
     return (

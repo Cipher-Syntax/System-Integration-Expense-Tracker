@@ -1,27 +1,25 @@
 import React, { useEffect, useState } from 'react'
 import api from '../api/api';
 import { Link } from 'react-router-dom';
+import { useFetchProfile } from '../hooks';
 
 const Header = () => {
     const [user, setUser] = useState(null);
+    const { fetchProfile, loading, error } = useFetchProfile()
 
-    useEffect(()  => {
-        try{
-            const fetchUserData = async () => {
-                const response = await api.get('api/profile/');
-                const data = response.data
-                console.log(data);
-                setUser(data)
-            }
-
-            fetchUserData();
-
+    useEffect(() => {
+        const getUserProfile = async () => {
+            const data = await fetchProfile();
+            setUser(data);
         }
-        catch(error){
-            console.log('Failed to get user data: ', error)
-        }
+
+        getUserProfile();
     }, [])
-    if (!user) return null;
+
+    if (loading) return <p>Loading...</p>;
+    if (error) return <p>Failed to load profile</p>;
+
+    if (!user) return null
 
     return (
         <Link to="/settings" className='flex items-center gap-x-3 mt-5 cursor-pointer'>
