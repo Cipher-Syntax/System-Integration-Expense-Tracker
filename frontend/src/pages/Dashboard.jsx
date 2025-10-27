@@ -135,10 +135,10 @@ const Dashboard = () => {
 
 
     return (
-        <section className='mt-26'>
+        <section className='mt-26 w-full'>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-pink-500 bg-clip-text text-transparent leading-relaxed tracking-widest">DASHBOARD</h1>
 
-            <div className='flex justify-center-safe items-center-safe gap-x-20'>
+            <div className='flex justify-center-safe items-center-safe gap-x-20 w-full mt-10'>
                 <div className='flex flex-col'>
                     <div className='w-[350px] h-[180px] bg-[#efeded] rounded-2xl p-5' style={{borderLeft: "5px solid #F844CE"}}>
                         <h2 className='text-gray-500'>Available Balance</h2>
@@ -209,8 +209,8 @@ const Dashboard = () => {
                 </div>
                 
                 {/* Chart */}
-                <div className="w-[650px] h-[350px] mt-10 bg-transparent rounded-2xl p-5 flex flex-col">
-                    <div className='flex items-center justify-between w-[95%]'>
+                <div className="w-full h-[350px] mt-10 bg-transparent rounded-2xl p-5 flex flex-col">
+                    <div className='flex items-center justify-between w-full'>
                         <h2 className="text-gray-700 mb-4 text-lg font-semibold">
                             Expenses Statistic
                         </h2>
@@ -222,7 +222,7 @@ const Dashboard = () => {
                     </div>
                     {chartData.length > 0 ? (
                         <div className="flex-1 min-h-[200px] min-w-[200px]">
-                            <ResponsiveContainer width="95%" height="90%">
+                            <ResponsiveContainer width="100%" height="100%">
                                 <AreaChart
                                     data={filteredData}
                                     margin={{ top: 10, right: 20, left: 0, bottom: 10 }}

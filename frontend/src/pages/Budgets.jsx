@@ -115,7 +115,7 @@ const Budgets = () => {
     };
 
     return (
-        <section className="mt-26 max-w-7xl mx-auto px-4">
+        <section className="mt-26 w-full mx-auto px-4">
             <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-pink-500 bg-clip-text text-transparent leading-relaxed tracking-widest">Budgets</h1>
 
             <div className="flex justify-between items-center mb-8 w-[1000px]">

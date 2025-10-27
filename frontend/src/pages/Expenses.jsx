@@ -232,10 +232,10 @@ const Expenses = () => {
 
 
     return (
-        <section className='mt-26'>
+        <section className='mt-26 w-full'>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-pink-500 bg-clip-text text-transparent leading-relaxed tracking-widest">Expenses</h1>
 
-            <div className='w-[1000px] mx-auto my-15'>
+            <div className='w-full mx-auto my-15'>
                 <div className='relative w-[900px] mx-auto'>
                     <Search className='absolute left-4 sm:left-6 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5' />
                     <input 
@@ -253,7 +253,7 @@ const Expenses = () => {
 
                 </div>
 
-                <div className='mt-15'>
+                <div className='mt-15 w-full'>
                     <div className='flex items-center gap-x-3'>
                         <Funnel />
                         <h2>Filter by:</h2>

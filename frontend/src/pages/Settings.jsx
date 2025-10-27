@@ -96,10 +96,10 @@ const Settings = () => {
 
 
     return (
-        <section className="mt-26 max-w-7xl mx-auto px-4">
+        <section className="mt-26 w-full mx-auto px-4">
             <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-pink-500 bg-clip-text text-transparent leading-relaxed tracking-widest">Settings & Profile</h1>
 
-            <div className="mb-8 w-[1000px] bg-white rounded-2xl py-5 px-15 h-auto">
+            <div className="mb-8 w-full bg-white rounded-2xl py-5 px-15 h-auto mt-10">
                 <div>
                     <h2 className='font-bold leading-relaxed tracking-wider text-2xl text-gray-500 mt-5'>Personal Information</h2>
                     
