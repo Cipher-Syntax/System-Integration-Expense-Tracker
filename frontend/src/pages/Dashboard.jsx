@@ -220,105 +220,117 @@ const Dashboard = () => {
                             <option value="monthly">Monthly</option>
                         </select>
                     </div>
-                    {chartData.length > 0 ? (
-                        <div className="flex-1 min-h-[200px] min-w-[200px]">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <AreaChart
-                                    data={filteredData}
-                                    margin={{ top: 10, right: 20, left: 0, bottom: 10 }}
-                                >
-                                <defs>
-                                    <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stopColor="#F844CE" stopOpacity={0.4} />
-                                    <stop offset="100%" stopColor="#F844CE" stopOpacity={0.05} />
-                                    </linearGradient>
-                                </defs>
+                    {
+                        chartData.length > 0 ? (
+                            <div className="flex-1 min-h-[200px] min-w-[200px]">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <AreaChart
+                                        data={filteredData}
+                                        margin={{ top: 10, right: 20, left: 0, bottom: 10 }}
+                                    >
+                                    <defs>
+                                        <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stopColor="#F844CE" stopOpacity={0.4} />
+                                        <stop offset="100%" stopColor="#F844CE" stopOpacity={0.05} />
+                                        </linearGradient>
+                                    </defs>
 
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-                                <YAxis tick={{ fontSize: 12 }} />
-                                <Tooltip
-                                    formatter={(value) =>
-                                    `₱${parseFloat(value).toLocaleString('en-PH', {
-                                        minimumFractionDigits: 2,
-                                    })}`
-                                    }
-                                />
-                                <Area
-                                    type="monotone"
-                                    dataKey="amount"
-                                    stroke="#F844CE"
-                                    fill="url(#colorExpense)"
-                                    strokeWidth={2}
-                                    activeDot={{ r: 5 }}
-                                />
-                                </AreaChart>
-                            </ResponsiveContainer>
-                        </div>
-                    ) : (
-                        <p className="text-gray-500 text-center mt-12">No Chart To Show Yet</p>
-                    )}
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+                                    <YAxis tick={{ fontSize: 12 }} />
+                                    <Tooltip
+                                        formatter={(value) =>
+                                        `₱${parseFloat(value).toLocaleString('en-PH', {
+                                            minimumFractionDigits: 2,
+                                        })}`
+                                        }
+                                    />
+                                    <Area
+                                        type="monotone"
+                                        dataKey="amount"
+                                        stroke="#F844CE"
+                                        fill="url(#colorExpense)"
+                                        strokeWidth={2}
+                                        activeDot={{ r: 5 }}
+                                    />
+                                    </AreaChart>
+                                </ResponsiveContainer>
+                            </div>
+                        ) : (
+                            <p className="text-gray-500 text-center mt-12 italic">No Chart To Show</p>
+                        )
+                    }
                 </div>
             </div>
 
             {/* Recent Expenses & Monthly Expenses */}
             <div className='flex items-left justify-left gap-x-20 mt-20 mb-10'>
                 <Link to="/expenses" className='w-[480px]'>
-                    <h2>Recent Expenses</h2>
+                    <h2 className='text-gray-700 font-semibold mb-4'>Recent Expenses</h2>
                     {
-                        expenses
-                        .slice(0, 5)
-                        .reverse()
-                        .map((expense) => (
-                            <div key={expense.id} className="p-3 border-b border-gray-200 flex items-center justify-between hover:bg-gray-400 cursor-pointer">
-                                <div>
-                                    <h4 className="font-semibold text-gray-700">
-                                    {expense.category?.name || 'Uncategorized'}
-                                    </h4>
-                                    <p className="text-sm text-gray-500">
-                                        {expense.date} — ₱{parseFloat(expense.amount).toLocaleString('en-PH', {
-                                        minimumFractionDigits: 2,
-                                        })}
-                                    </p>
+                        expenses.length > 0 ? (
+                            expenses
+                            .slice(0, 5)
+                            .reverse()
+                            .map((expense) => (
+                                <div key={expense.id} className="p-3 border-b border-gray-200 flex items-center justify-between hover:bg-gray-400 cursor-pointer">
+                                    <div>
+                                        <h4 className="font-semibold text-gray-700">
+                                        {expense.category?.name || 'Uncategorized'}
+                                        </h4>
+                                        <p className="text-sm text-gray-500">
+                                            {expense.date} — ₱{parseFloat(expense.amount).toLocaleString('en-PH', {
+                                            minimumFractionDigits: 2,
+                                            })}
+                                        </p>
+                                    </div>
+                                    <div className='text-gray-500 cursor-pointer'>
+                                        <ArrowRight></ArrowRight>
+                                    </div>
                                 </div>
-                                <div className='text-gray-500 cursor-pointer'>
-                                    <ArrowRight></ArrowRight>
-                                </div>
-                            </div>
-                        ))
+                            ))
+                        ) : (
+                            <p className="mt-10 italic text-gray-500">No Recent Expenses To Show</p>
+                        )
                     }
 
                 </Link>
                 {/* Monthly Expenses */}
                 <div className="w-[500px]">
                     <h2 className="text-gray-700 font-semibold mb-4">Monthly Expenses</h2>
-                    <div className="grid grid-cols-3 gap-4">
-                        {
-                            Object.entries(expenses.reduce((acc, expense) => {
-                                const month = new Date(expense.date).toLocaleString('default', {
-                                month: 'long',
-                                year: 'numeric',
-                                });
-                                acc[month] = (acc[month] || 0) + parseFloat(expense.amount);
-                                return acc;
+                    {
+                        expenses.length > 0 ? (
+                            <div className="grid grid-cols-3 gap-4">
+                                {
+                                    Object.entries(expenses.reduce((acc, expense) => {
+                                        const month = new Date(expense.date).toLocaleString('default', {
+                                            month: 'long',
+                                            year: 'numeric',
+                                        });
+                                        acc[month] = (acc[month] || 0) + parseFloat(expense.amount);
+                                        return acc;
 
-                            }, {})
-                            )
-                            .slice(0, 6)
-                            .reverse()
-                            .map(([month, total]) => (
-                                <div
-                                    key={month}
-                                    className="bg-white shadow-md rounded-xl p-4 border border-gray-200 hover:shadow-lg transition"
-                                >
-                                    <h3 className="font-semibold text-gray-700 text-sm">{month}</h3>
-                                    <p className="text-[#F844CE] text-lg font-bold mt-2">
-                                        ₱{total.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
-                                    </p>
-                                </div>
-                            ))
-                        }
-                    </div>
+                                    }, {})
+                                    )
+                                    .slice(0, 6)
+                                    .reverse()
+                                    .map(([month, total]) => (
+                                        <div
+                                            key={month}
+                                            className="bg-white shadow-md rounded-xl p-4 border border-gray-200 hover:shadow-lg transition"
+                                        >
+                                            <h3 className="font-semibold text-gray-700 text-sm">{month}</h3>
+                                            <p className="text-[#F844CE] text-lg font-bold mt-2">
+                                                ₱{total.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
+                                            </p>
+                                        </div>
+                                    ))
+                                }
+                            </div>
+                        ) : (
+                            <p className="mt-10 italic text-gray-500">No Monthly Expenses To Show</p>
+                        )
+                    }
                 </div>
             </div>
         </section>

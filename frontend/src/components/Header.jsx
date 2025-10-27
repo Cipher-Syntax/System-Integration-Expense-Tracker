@@ -5,18 +5,22 @@ import { Link } from 'react-router-dom';
 const Header = () => {
     const [user, setUser] = useState(null);
 
-    useEffect(() => {
-        const fetchUser = async () => {
-            try {
-                const response = await api.get('/api/user/', { withCredentials: true });
-                setUser(response.data);
-            } catch (error) {
-                console.error('Error fetching user:', error);
+    useEffect(()  => {
+        try{
+            const fetchUserData = async () => {
+                const response = await api.get('api/profile/');
+                const data = response.data
+                console.log(data);
+                setUser(data)
             }
-        };
-        fetchUser();
-    }, []);
 
+            fetchUserData();
+
+        }
+        catch(error){
+            console.log('Failed to get user data: ', error)
+        }
+    }, [])
     if (!user) return null;
 
     return (

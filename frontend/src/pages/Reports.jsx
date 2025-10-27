@@ -88,30 +88,31 @@ const Reports = () => {
     useEffect(() => {
         const fetchCategory = async () => {
             try {
-            const colors = ["#ec4899", "#f472b6", "#fb7185", "#fda4af", "#fbbf24", "#60a5fa"];
-            const response = await api.get("api/categories/");
-            const categoriesData = response.data;
+                const colors = ["#ec4899", "#f472b6", "#fb7185", "#fda4af", "#fbbf24", "#60a5fa"];
+                const response = await api.get("api/categories/");
+                const categoriesData = response.data;
 
-            const filteredExpenses = activeBudget ? rawExpenses.filter(exp => exp.budget === activeBudget.id) : rawExpenses;
+                const filteredExpenses = activeBudget ? rawExpenses.filter(exp => exp.budget === activeBudget.id) : rawExpenses;
 
-            const categoryTotals = {};
-            filteredExpenses.forEach(exp => {
-                const categoryName = exp.category?.name || exp.category;
-                if (!categoryTotals[categoryName]) {
-                categoryTotals[categoryName] = 0;
-                }
-                categoryTotals[categoryName] += parseFloat(exp.amount);
-            });
+                const categoryTotals = {};
+                filteredExpenses.forEach(exp => {
+                    const categoryName = exp.category?.name || exp.category;
+                    if (!categoryTotals[categoryName]) {
+                        categoryTotals[categoryName] = 0;
+                    }
+                    categoryTotals[categoryName] += parseFloat(exp.amount);
+                });
 
-            const categoriesWithColors = categoriesData.map((cat, idx) => ({
-                ...cat,
-                value: categoryTotals[cat.name] || 0,
-                color: colors[idx % colors.length],
-            }));
+                const categoriesWithColors = categoriesData.map((cat, idx) => ({
+                    ...cat,
+                    value: categoryTotals[cat.name] || 0,
+                    color: colors[idx % colors.length],
+                }));
 
-            setCategories(categoriesWithColors);
-            } catch (error) {
-            console.log("Failed to get categories: ", error);
+                setCategories(categoriesWithColors);
+            } 
+            catch (error) {
+                console.log("Failed to get categories: ", error);
             }
         };
 
@@ -220,39 +221,45 @@ const Reports = () => {
                         <h3 className="text-lg font-bold text-gray-800">Expenses</h3>
                         <TrendingUp className="w-5 h-5 text-pink-600" />
                     </div>
-                    <ResponsiveContainer width="100%" height="90%">
-                        <AreaChart
-                            data={expenses}
-                            margin={{ top: 10, right: 20, left: 0, bottom: 10 }}
-                        >
+                    {
+                        expenses.length > 0 ? (
+                            <ResponsiveContainer width="100%" height="90%">
+                                <AreaChart
+                                    data={expenses}
+                                    margin={{ top: 10, right: 20, left: 0, bottom: 10 }}
+                                >
 
-                            <defs>
-                                <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stopColor="#F844CE" stopOpacity={0.4} />
-                                <stop offset="100%" stopColor="#F844CE" stopOpacity={0.05} />
-                                </linearGradient>
-                            </defs>
+                                    <defs>
+                                        <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stopColor="#F844CE" stopOpacity={0.4} />
+                                        <stop offset="100%" stopColor="#F844CE" stopOpacity={0.05} />
+                                        </linearGradient>
+                                    </defs>
 
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-                            <YAxis tick={{ fontSize: 12 }} />
-                            <Tooltip
-                                formatter={(value) =>
-                                `₱ ${parseFloat(value).toLocaleString('en-PH', {
-                                    minimumFractionDigits: 2,
-                                })}`
-                                }
-                            />
-                            <Area
-                                type="monotone"
-                                dataKey="amount"
-                                stroke="#F844CE"
-                                fill="url(#colorExpense)"
-                                strokeWidth={2}
-                                activeDot={{ r: 5 }}
-                            />
-                        </AreaChart>
-                    </ResponsiveContainer>
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+                                    <YAxis tick={{ fontSize: 12 }} />
+                                    <Tooltip
+                                        formatter={(value) =>
+                                        `₱ ${parseFloat(value).toLocaleString('en-PH', {
+                                            minimumFractionDigits: 2,
+                                        })}`
+                                        }
+                                    />
+                                    <Area
+                                        type="monotone"
+                                        dataKey="amount"
+                                        stroke="#F844CE"
+                                        fill="url(#colorExpense)"
+                                        strokeWidth={2}
+                                        activeDot={{ r: 5 }}
+                                    />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <p className="mt-10 italic">No Charts To Show</p>
+                        )
+                    }
                 </div>
 
                 <div className="bg-white rounded-xl shadow-md border border-gray-100 p-6">
@@ -260,27 +267,33 @@ const Reports = () => {
                         <h3 className="text-lg font-bold text-gray-800">Spending by Category</h3>
                         <Circle className="w-5 h-5 text-pink-600" />
                     </div>
-                    <ResponsiveContainer width="100%" height={250}>
-                        <PieChart>
-                            <Pie
-                                data={categories}
-                                cx="50%"
-                                cy="50%"
-                                innerRadius={60}
-                                outerRadius={90}
-                                paddingAngle={5}
-                                dataKey="value"
-                                >
-                                {categories.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={entry.color} />
-                                ))}
-                            </Pie>
-                            <Tooltip 
-                            contentStyle={{ backgroundColor: 'white', border: '1px solid #e5e7eb', borderRadius: '8px' }}
-                            formatter={(value) => `₱ ${value}`}
-                            />
-                        </PieChart>
-                    </ResponsiveContainer>
+                    {
+                        categories.length > 0 ? (
+                            <ResponsiveContainer width="100%" height={250}>
+                                <PieChart>
+                                    <Pie
+                                        data={categories}
+                                        cx="50%"
+                                        cy="50%"
+                                        innerRadius={60}
+                                        outerRadius={90}
+                                        paddingAngle={5}
+                                        dataKey="value"
+                                        >
+                                        {categories.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={entry.color} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip 
+                                    contentStyle={{ backgroundColor: 'white', border: '1px solid #e5e7eb', borderRadius: '8px' }}
+                                    formatter={(value) => `₱ ${value}`}
+                                    />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <p className="mt-10 italic">No Charts To Show</p>
+                        )
+                    }
                     <div className="grid grid-cols-2 gap-2 mt-4">
                         {categories
                             .filter((cat) => cat.value > 0)
@@ -300,28 +313,34 @@ const Reports = () => {
                 <h3 className="text-lg font-bold text-gray-800 mb-4">Top Expenses</h3>
                 <div className="overflow-x-auto">
                     <table className="w-full">
-                    <thead>
-                        <tr className="border-b border-gray-200">
-                        <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600">Description</th>
-                        <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600">Category</th>
-                        <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600">Date</th>
-                        <th className="text-right py-3 px-4 text-xs font-semibold text-gray-600">Amount</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {topExpenses.map((expense, idx) => (
-                        <tr key={idx} className="border-b border-gray-100 hover:bg-pink-50 transition-colors">
-                            <td className="py-3 px-4 text-sm text-gray-800 font-medium">{expense.name}</td>
-                            <td className="py-3 px-4">
-                            <span className="inline-block px-2 py-1 bg-pink-100 text-pink-700 text-xs font-semibold rounded">
-                                {expense.category}
-                            </span>
-                            </td>
-                            <td className="py-3 px-4 text-sm text-gray-600">{expense.date}</td>
-                            <td className="py-3 px-4 text-sm text-gray-800 font-bold text-right">${expense.amount}</td>
-                        </tr>
-                        ))}
-                    </tbody>
+                        <thead>
+                            <tr className="border-b border-gray-200">
+                            <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600">Description</th>
+                            <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600">Category</th>
+                            <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600">Date</th>
+                            <th className="text-right py-3 px-4 text-xs font-semibold text-gray-600">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {
+                                topExpenses.length > 0 ? (
+                                    topExpenses.map((expense, idx) => (
+                                        <tr key={idx} className="border-b border-gray-100 hover:bg-pink-50 transition-colors">
+                                            <td className="py-3 px-4 text-sm text-gray-800 font-medium">{expense.name}</td>
+                                            <td className="py-3 px-4">
+                                            <span className="inline-block px-2 py-1 bg-pink-100 text-pink-700 text-xs font-semibold rounded">
+                                                {expense.category}
+                                            </span>
+                                            </td>
+                                            <td className="py-3 px-4 text-sm text-gray-600">{expense.date}</td>
+                                            <td className="py-3 px-4 text-sm text-gray-800 font-bold text-right">${expense.amount}</td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <td colSpan={4} className='text-center pt-10 italic'>No Top Expenses To Show</td>
+                                )
+                            }
+                        </tbody>
                     </table>
                 </div>
             </div>
