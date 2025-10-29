@@ -11,7 +11,7 @@ const Layout = () => {
             <header className='top-15 md:top-0 absolute right-0'>
                 <Header></Header>
             </header>
-            <main className='w-full p-10'>
+            <main className='w-full py-16'>
                 <Outlet></Outlet>
             </main>
             <footer className='w-[300px] fixed left-[40%] md:left-[80%] bottom-[5%]'>
