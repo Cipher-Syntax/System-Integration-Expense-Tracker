@@ -222,11 +222,11 @@ const Expenses = () => {
 
 
     return (
-        <section className='mt-26 w-full'>
+        <section className="mt-26 w-full px-4 sm:px-8 overflow-x-auto">
             <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-pink-500 bg-clip-text text-transparent leading-relaxed tracking-widest">Expenses</h1>
 
             <div className='w-full mx-auto my-15'>
-                <div className='relative w-[900px] mx-auto'>
+                <div className="relative w-full sm:w-[900px] mx-auto mt-5">
                     <Search className='absolute left-4 sm:left-6 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5' />
                     <input 
                         type="text"
@@ -243,41 +243,42 @@ const Expenses = () => {
 
                 </div>
 
-                <div className='mt-15 w-full'>
-                    <div className='flex items-center gap-x-3'>
+                <div className="mt-15 w-full">
+                    <div className="flex items-center gap-x-3">
                         <Funnel />
                         <h2>Filter by:</h2>
                     </div>
 
-                    <div  className='flex items-center justify-between mt-3 text-gray-600'>
-                        <div className='w-[500px] flex items-center justify-between gap-x-5'>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-3 text-gray-600 gap-4">
+                        {/* Filters */}
+                        <div className="w-full sm:w-auto flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-x-5">
                             {/* Category */}
-                            <select 
+                            <select
                                 value={category}
                                 onChange={(e) => {
-                                    const params = new URLSearchParams(searchParams);
-                                    params.set('category', e.target.value);
-                                    setSearchParams(params);
+                                const params = new URLSearchParams(searchParams);
+                                params.set("category", e.target.value);
+                                setSearchParams(params);
                                 }}
-                                className='border w-[200px] py-1 px-2 rounded-full'
+                                className="border w-full sm:w-[200px] py-1 px-2 rounded-full"
                             >
                                 <option value="">Category</option>
-                                {
-                                    categories.map(cat => (
-                                        <option key={cat.id} value={cat.id}>{cat.name}</option>
-                                    ))
-                                }
+                                {categories.map((cat) => (
+                                <option key={cat.id} value={cat.id}>
+                                    {cat.name}
+                                </option>
+                                ))}
                             </select>
 
                             {/* Date */}
-                            <select 
+                            <select
                                 value={date}
                                 onChange={(e) => {
-                                    const params = new URLSearchParams(searchParams);
-                                    params.set('date', e.target.value);
-                                    setSearchParams(params);
+                                const params = new URLSearchParams(searchParams);
+                                params.set("date", e.target.value);
+                                setSearchParams(params);
                                 }}
-                                className='border w-[200px] py-1 px-2 rounded-full'
+                                className="border w-full sm:w-[200px] py-1 px-2 rounded-full"
                             >
                                 <option value="">Date</option>
                                 <option value="january">January</option>
@@ -295,96 +296,112 @@ const Expenses = () => {
                             </select>
 
                             {/* Amount */}
-                            <select 
+                            <select
                                 value={amount}
                                 onChange={(e) => {
-                                    const params = new URLSearchParams(searchParams);
-                                    params.set('amount', e.target.value);
-                                    setSearchParams(params);
+                                const params = new URLSearchParams(searchParams);
+                                params.set("amount", e.target.value);
+                                setSearchParams(params);
                                 }}
-                                className='border w-[200px] py-1 px-2 rounded-full'
+                                className="border w-full sm:w-[200px] py-1 px-2 rounded-full"
                             >
                                 <option value="">Amount</option>
                                 <option value="below-1000">Below ₱ 1,000</option>
                                 <option value="1000-5000">₱ 1,000 – ₱ 5,000</option>
                                 <option value="5000-10000">₱ 5,000 – ₱ 10,000</option>
                                 <option value="above-10000">Above ₱ 10,000</option>
-
                             </select>
+                            </div>
 
-                        </div>
-                        <button
-                            className="w-[250px] py-2 px-2 bg-pink-500 text-white text-center rounded-md font-bold cursor-pointer"
+                            {/* Add Expense Button */}
+                            <button
+                            className="w-full sm:w-[250px] py-2 px-2 bg-pink-500 text-white text-center rounded-md font-bold cursor-pointer"
                             onClick={() => {
                                 setCurrentExpense({
-                                    name: '',
-                                    description: '',
-                                    date: '',
-                                    amount: '',
-                                    category: '',
-                                    budget: ''
+                                name: "",
+                                description: "",
+                                date: "",
+                                amount: "",
+                                category: "",
+                                budget: "",
                                 });
                                 setShowModal(true);
                             }}
-                        >
+                            >
                             Add Expense
-                        </button>
+                            </button>
+                        </div>
                     </div>
-                </div>
+
 
                 {/* Expenses table */}
-                <table className='mt-10 w-full text-gray-500'>
-                    <thead className='border text-center'>
+                <div className="overflow-x-auto mt-10">
+                    <table className="min-w-[700px] w-full text-gray-500 text-sm sm:text-base">
+                        <thead className="border text-center bg-gray-50">
                         <tr>
-                            <th className='py-1 border'>Expense</th>
-                            <th className='py-1 border'>Category</th>
-                            <th className='py-1 border'>Description</th>
-                            <th className='py-1 border'>Date</th>
-                            <th className='py-1 border'>Amount</th>
-                            <th className='py-1 border'>Action</th>
+                            <th className="py-2 border px-2">Expense</th>
+                            <th className="py-2 border px-2">Category</th>
+                            <th className="py-2 border px-2">Description</th>
+                            <th className="py-2 border px-2">Date</th>
+                            <th className="py-2 border px-2">Amount</th>
+                            <th className="py-2 border px-2">Action</th>
                         </tr>
-                    </thead>
+                        </thead>
 
-                    <tbody>
-                        {
-                            currentExpenses.length > 0 ? (
-                                currentExpenses
-                                .map((expense) => (
-                                    <tr key={expense.id}>
-                                        <td className='py-2 border px-3'>{expense.name}</td>
-                                        <td className='py-2 border px-3'>{expense.category.name}</td>
-                                        <td className='py-2 border px-3'>{expense.description ? expense.description : "-"}</td>
-                                        <td className='py-2 border px-3'>{expense.date}</td>
-                                        <td className='py-2 border px-3'>{Number(expense.amount).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                                        <td className='flex items-center justify-center gap-x-3 py-2 border px-3'>
-                                            <button 
-                                                onClick={() => {
-                                                    const params = new URLSearchParams(searchParams);
-                                                    params.set('edit', encryptId(expense.id));
-                                                    setSearchParams(params);
-                                                    setCurrentExpense(expense);
-                                                    setShowModal(true);
-                                                }}
+                        <tbody>
+                        {currentExpenses.length > 0 ? (
+                            currentExpenses.map((expense) => (
+                            <tr
+                                key={expense.id}
+                                className="hover:bg-gray-50 transition-colors duration-200"
+                            >
+                                <td className="py-2 border px-3 whitespace-nowrap">
+                                {expense.name}
+                                </td>
+                                <td className="py-2 border px-3 whitespace-nowrap">
+                                {expense.category.name}
+                                </td>
+                                <td className="py-2 border px-3">
+                                {expense.description ? expense.description : "-"}
+                                </td>
+                                <td className="py-2 border px-3 whitespace-nowrap">
+                                {expense.date}
+                                </td>
+                                <td className="py-2 border px-3 whitespace-nowrap">
+                                {Number(expense.amount).toLocaleString("en-PH", {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2,
+                                })}
+                                </td>
+                                <td className="flex items-center justify-center gap-x-3 py-2 border px-3">
+                                <button
+                                    onClick={() => {
+                                    const params = new URLSearchParams(searchParams);
+                                    params.set("edit", encryptId(expense.id));
+                                    setSearchParams(params);
+                                    setCurrentExpense(expense);
+                                    setShowModal(true);
+                                    }}
+                                >
+                                    <SquarePen className="text-blue-500 cursor-pointer" />
+                                </button>
+                                <button onClick={() => handleDeleteClick(expense)}>
+                                    <Trash2 className="text-red-500 cursor-pointer" />
+                                </button>
+                                </td>
+                            </tr>
+                            ))
+                        ) : (
+                            <tr>
+                            <td colSpan={7} className="text-center py-4 text-gray-500">
+                                No Expenses
+                            </td>
+                            </tr>
+                        )}
+                        </tbody>
+                    </table>
+                </div>
 
-                                                
-                                            >
-                                                <SquarePen className='text-blue-500 cursor-pointer'></SquarePen>
-                                            </button>
-                                            <button onClick={() => handleDeleteClick(expense)}>
-                                                <Trash2 className='text-red-500 cursor-pointer' />
-                                            </button>
-
-                                        </td>
-                                    </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td colSpan={7} className='text-center py-2'>No Expenses</td>
-                                </tr>
-                            )
-                        }
-                    </tbody>
-                </table>
 
                 {/* Pagination */}
                 <div className="flex items-center justify-center gap-2 mt-10">
@@ -423,194 +440,199 @@ const Expenses = () => {
                 </div>
 
                 {showModal && (
-                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
-                        <div className="bg-white p-6 rounded-lg w-[400px]">
-                            <h2 className="text-lg font-semibold mb-3">
-                                {isEditing ? "Edit Expense" : "Add New Expense"}
-                            </h2>
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-3 sm:px-0">
+                        <div className="bg-white p-4 sm:p-6 rounded-lg w-full max-w-[90%] sm:w-[400px]">
+                        <h2 className="text-lg font-semibold mb-3 text-center sm:text-left">
+                            {isEditing ? "Edit Expense" : "Add New Expense"}
+                        </h2>
 
-                            <div>
-                                <label>Expense</label>
+                        <div>
+                            <label>Expense</label>
+                            <input
+                            type="text"
+                            value={currentExpense.name}
+                            onChange={(e) => setCurrentExpense({ ...currentExpense, name: e.target.value })}
+                            className="border w-full mb-2 p-2 rounded"
+                            />
+                        </div>
+
+                        <div>
+                            <label>Category</label>
+                            <select
+                            className="border w-full mb-2 p-2 rounded"
+                            value={currentExpense.category?.id || currentExpense.category || ''}
+                            onChange={(e) => {
+                                const selectedValue = e.target.value;
+
+                                if (selectedValue === "new-category") {
+                                setOpenModalForNewCategory(true);
+                                } else {
+                                const selectedCategory = categories.find(
+                                    (cat) => cat.id === parseInt(selectedValue)
+                                );
+                                setCurrentExpense({
+                                    ...currentExpense,
+                                    category: selectedCategory || '',
+                                });
+                                }
+                            }}
+                            >
+                            <option value="">Select Category</option>
+                            {categories.map((cat) => (
+                                <option key={cat.id} value={cat.id}>{cat.name}</option>
+                            ))}
+                            <option value="new-category">Create New Category</option>
+                            </select>
+                        </div>
+
+                        {openModalForNewCategory && (
+                            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-3 sm:px-0">
+                            <div className="bg-white p-4 sm:p-6 rounded-lg w-full max-w-[90%] sm:w-[350px]">
+                                <h2 className="text-lg font-semibold mb-4 text-center">
+                                Create New Category
+                                </h2>
                                 <input
-                                    type="text"
-                                    value={currentExpense.name}
-                                    onChange={(e) => setCurrentExpense({ ...currentExpense, name: e.target.value })}
-                                    className="border w-full mb-2 p-2 rounded"
+                                type="text"
+                                placeholder="Category name"
+                                value={newCategory || ''}
+                                onChange={(e) => setNewCategory(e.target.value)}
+                                className="border w-full mb-4 p-2 rounded"
                                 />
-                            </div>
-
-                            <div>
-                                <label>Category</label>
-                                <select
-                                    className="border w-full mb-2 p-2 rounded"
-                                    value={currentExpense.category?.id || currentExpense.category || ''}
-                                    onChange={(e) => {
-                                        const selectedValue = e.target.value;
-
-                                        if (selectedValue === "new-category"){
-                                            setOpenModalForNewCategory(true);
-                                        }
-                                        else{
-                                            const selectedCategory = categories.find((cat) => cat.id === parseInt(selectedValue))
-                                            setCurrentExpense({
-                                                ...currentExpense,
-                                                category: selectedCategory || '',
-                                            })
-                                        }
-
-                                    }}
-                                >
-                                    <option value="">Select Category</option>
-                                    {categories.map((cat) => (
-                                        <option key={cat.id} value={cat.id}>{cat.name}</option>
-                                    ))}
-                                    <option value="new-category">Create New Category</option>
-                                </select>
-                            </div>
-
-                            {openModalForNewCategory && (
-                                <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
-                                    <div className="bg-white p-6 rounded-lg w-[350px]">
-                                        <h2 className="text-lg font-semibold mb-4 text-center">
-                                            Create New Category
-                                        </h2>
-                                        <input
-                                            type="text"
-                                            placeholder="Category name"
-                                            value={newCategory || ''}
-                                            onChange={(e) => setNewCategory(e.target.value)}
-                                            className="border w-full mb-4 p-2 rounded"
-                                        />
-                                        <div className="flex justify-end gap-3">
-                                            <button
-                                            onClick={() => {
-                                                setOpenModalForNewCategory(false);
-                                                setNewCategory('');
-                                            }}
-                                            className="px-3 py-1 border rounded cursor-pointer"
-                                            >
-                                            Cancel
-                                            </button>
-                                            <button
-                                                onClick={addNewCategory}
-                                            className="px-3 py-1 bg-pink-500 text-white rounded cursor-pointer"
-                                            >
-                                                Save
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                                )}
-
-
-                            <div>
-                                <label>Description</label>
-                                <textarea
-                                    value={currentExpense.description}
-                                    onChange={(e) => setCurrentExpense({ ...currentExpense, description: e.target.value })}
-                                    className="border w-full mb-2 p-2 rounded"
-                                ></textarea>
-                            </div>
-
-                            <div>
-                                <label>Date</label>
-                                <input
-                                    type="date"
-                                    value={currentExpense.date}
-                                    onChange={(e) => setCurrentExpense({ ...currentExpense, date: e.target.value })}
-                                    className="border w-full mb-2 p-2 rounded"
-                                />
-                            </div>
-
-                            <div>
-                                <label>Amount</label>
-                                <input
-                                    type="number"
-                                    value={currentExpense.amount}
-                                    onChange={(e) => setCurrentExpense({ ...currentExpense, amount: e.target.value })}
-                                    className="border w-full mb-2 p-2 rounded"
-                                />
-                                {amountError && (
-                                    <p className="text-red-500 text-sm mt-1">{amountError}</p>
-                                )}
-                            </div>
-
-                            <div>
-                                <label>Budget</label>
-                                <select
-                                    className="border w-full mb-2 p-2 rounded"
-                                    value={currentExpense.budget?.id || currentExpense.budget || ''}
-                                    onChange={(e) =>
-                                        setCurrentExpense({
-                                            ...currentExpense,
-                                            budget: budgets.find((b) => b.id === parseInt(e.target.value)),
-                                        })
-                                    }
-                                >
-                                    <option value="">Select Budget</option>
-                                    {
-                                        budgets.filter(b => b.status === "active").length > 0 ? (
-                                            budgets
-                                                .filter(b => b.status === "active")
-                                                .map((b) => (
-                                                    <option key={b.id} value={b.id}>
-                                                        ₱ {Number(b.limit_amount).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                                    </option>
-                                                ))
-                                        ) : (
-                                            <option disabled>No active budgets yet</option>
-                                        )
-                                    }
-                                </select>
-                            </div>
-
-                            <div className="flex justify-end gap-3 mt-3">
+                                <div className="flex flex-col sm:flex-row justify-end gap-3">
                                 <button
-                                    onClick={closeModal}
-                                    className="px-3 py-1 border rounded cursor-pointer"
+                                    onClick={() => {
+                                    setOpenModalForNewCategory(false);
+                                    setNewCategory('');
+                                    }}
+                                    className="px-3 py-1 border rounded cursor-pointer w-full sm:w-auto"
                                 >
                                     Cancel
                                 </button>
                                 <button
-                                    onClick={handleSave}
-                                    className="px-3 py-1 bg-pink-500 text-white rounded cursor-pointer"
+                                    onClick={addNewCategory}
+                                    className="px-3 py-1 bg-pink-500 text-white rounded cursor-pointer w-full sm:w-auto"
                                 >
                                     Save
                                 </button>
+                                </div>
                             </div>
+                            </div>
+                        )}
+
+                        <div>
+                            <label>Description</label>
+                            <textarea
+                            value={currentExpense.description}
+                            onChange={(e) =>
+                                setCurrentExpense({ ...currentExpense, description: e.target.value })
+                            }
+                            className="border w-full mb-2 p-2 rounded"
+                            ></textarea>
+                        </div>
+
+                        <div>
+                            <label>Date</label>
+                            <input
+                            type="date"
+                            value={currentExpense.date}
+                            onChange={(e) =>
+                                setCurrentExpense({ ...currentExpense, date: e.target.value })
+                            }
+                            className="border w-full mb-2 p-2 rounded"
+                            />
+                        </div>
+
+                        <div>
+                            <label>Amount</label>
+                            <input
+                            type="number"
+                            value={currentExpense.amount}
+                            onChange={(e) =>
+                                setCurrentExpense({ ...currentExpense, amount: e.target.value })
+                            }
+                            className="border w-full mb-2 p-2 rounded"
+                            />
+                            {amountError && (
+                            <p className="text-red-500 text-sm mt-1">{amountError}</p>
+                            )}
+                        </div>
+
+                        <div>
+                            <label>Budget</label>
+                            <select
+                            className="border w-full mb-2 p-2 rounded"
+                            value={currentExpense.budget?.id || currentExpense.budget || ''}
+                            onChange={(e) =>
+                                setCurrentExpense({
+                                ...currentExpense,
+                                budget: budgets.find((b) => b.id === parseInt(e.target.value)),
+                                })
+                            }
+                            >
+                            <option value="">Select Budget</option>
+                            {budgets.filter((b) => b.status === "active").length > 0 ? (
+                                budgets
+                                .filter((b) => b.status === "active")
+                                .map((b) => (
+                                    <option key={b.id} value={b.id}>
+                                    ₱{" "}
+                                    {Number(b.limit_amount).toLocaleString("en-PH", {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2,
+                                    })}
+                                    </option>
+                                ))
+                            ) : (
+                                <option disabled>No active budgets yet</option>
+                            )}
+                            </select>
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row justify-end gap-3 mt-3">
+                            <button
+                            onClick={closeModal}
+                            className="px-3 py-1 border rounded cursor-pointer w-full sm:w-auto"
+                            >
+                            Cancel
+                            </button>
+                            <button
+                            onClick={handleSave}
+                            className="px-3 py-1 bg-pink-500 text-white rounded cursor-pointer w-full sm:w-auto"
+                            >
+                            Save
+                            </button>
+                        </div>
                         </div>
                     </div>
                 )}
+
 
                 {deleteTarget && (
-                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
-                        <div className="bg-white p-6 rounded-lg w-[350px]">
-                            <h2 className="text-lg font-semibold mb-4 text-center">
-                                Delete this expense?
-                            </h2>
-                            <p className="text-gray-600 text-center mb-4">
-                                “{deleteTarget.name}” will be permanently removed.
-                            </p>
-                            <div className="flex justify-end gap-3 mt-10">
-                                <button
-                                    onClick={() => setDeleteTarget(null)}
-                                    className="px-3 py-1 border rounded cursor-pointer"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    onClick={confirmDelete}
-                                    className="px-3 py-1 bg-red-500 text-white rounded cursor-pointer"
-                                >
-                                    Delete
-                                </button>
-                            </div>
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-3 sm:px-0">
+                        <div className="bg-white p-4 sm:p-6 rounded-lg w-full max-w-[90%] sm:w-[350px]">
+                        <h2 className="text-lg font-semibold mb-4 text-center">
+                            Delete this expense?
+                        </h2>
+                        <p className="text-gray-600 text-center mb-4 break-words">
+                            “{deleteTarget.name}” will be permanently removed.
+                        </p>
+                        <div className="flex flex-col sm:flex-row justify-end gap-3 mt-8">
+                            <button
+                            onClick={() => setDeleteTarget(null)}
+                            className="px-3 py-1 border rounded cursor-pointer w-full sm:w-auto"
+                            >
+                            Cancel
+                            </button>
+                            <button
+                            onClick={confirmDelete}
+                            className="px-3 py-1 bg-red-500 text-white rounded cursor-pointer w-full sm:w-auto"
+                            >
+                            Delete
+                            </button>
+                        </div>
                         </div>
                     </div>
                 )}
-
-
-
             </div>
         </section>
     )

@@ -4,17 +4,7 @@ import { Link } from 'react-router-dom';
 import { useFetchProfile } from '../hooks';
 
 const Header = () => {
-    // const [user, setUser] = useState(null);
     const { user, loading, error } = useFetchProfile()
-
-    // useEffect(() => {
-    //     const getUserProfile = async () => {
-    //         const data = await fetchProfile();
-    //         setUser(data);
-    //     }
-
-    //     getUserProfile();
-    // }, [])
 
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Failed to load profile</p>;
