@@ -10,7 +10,6 @@ const useFetchProfile = () => {
         const fetchProfile = async () => {
             try {
                 const response = await api.get("api/profile/");
-                console.log(response.data)
                 setUser(response.data);
                 setError(null);
             } 

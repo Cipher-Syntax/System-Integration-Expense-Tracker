@@ -337,7 +337,9 @@ const Reports = () => {
                                         </tr>
                                     ))
                                 ) : (
-                                    <td colSpan={4} className='text-center pt-10 italic'>No Top Expenses To Show</td>
+                                    <tr>
+                                        <td colSpan={4} className='text-center pt-10 italic'>No Top Expenses To Show</td>
+                                    </tr>
                                 )
                             }
                         </tbody>

@@ -37,16 +37,9 @@ const Expenses = () => {
         }
     };
 
-
-
-
     const [budgets, setBudgets] = useState([]);
-    // console.log(budgets.limit_amount);
     const [amountError, setAmountError] = useState('');
-
-
     const isEditing = !!currentExpense.id;
-
 
     const handleSave = async () => {
         try {
@@ -128,7 +121,6 @@ const Expenses = () => {
             expense.description?.toLowerCase().includes(q.toLowerCase()) ||
             expense.category?.name.toLowerCase().includes(q.toLowerCase());
 
-        // const categoryMatch = category ? expense.category?.name.toLowerCase() === category.toLowerCase() : true;
         const categoryMatch = category ? String(expense.category?.id) === String(category) : true;
 
 
@@ -182,7 +174,6 @@ const Expenses = () => {
         const fetchCategories = async () => {
             try{
                 const response = await api.get('api/categories/');
-                console.log(response.data)
                 setCategories(response.data)
             }
             catch(error){
@@ -196,7 +187,6 @@ const Expenses = () => {
     useEffect(() => {
         const fetchExpenses = async () => {
             const response = await api.get('api/expenses/');
-            console.log(response.data);
             setExpenses(response.data);
         }
 
@@ -388,7 +378,9 @@ const Expenses = () => {
                                     </tr>
                                 ))
                             ) : (
-                                <td colSpan={7} className='text-center py-2'>No Expenses</td>
+                                <tr>
+                                    <td colSpan={7} className='text-center py-2'>No Expenses</td>
+                                </tr>
                             )
                         }
                     </tbody>

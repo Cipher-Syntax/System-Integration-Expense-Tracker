@@ -19,19 +19,16 @@ const Budgets = () => {
         end_date: "",
     });
 
-    // const today = new Date().toISOString().split("T")[0];
-
     const fetchBudgets = async () => {
         try {
             const response = await api.get("api/budgets/");
-            // console.log(response.data);
             setBudgets(response.data);
 
             const current = response.data.find((b) => b.status === "active");
-            console.log(current);
             setActiveBudget(current || null);
             setExpenseTracker(current ? current.limit_amount : null);
-        } catch (err) {
+        } 
+        catch (err) {
             console.error("Failed to fetch budgets:", err);
         }
     };
@@ -45,7 +42,6 @@ const Budgets = () => {
         const fetchTotalExpenses = async () => {
             try{
                 const response = await api.get('api/budgets/total_expenses/');
-                // console.log(response.data.total_expenses);
                 setTotalExpenses(response.data.total_expenses);
             }
             catch(error){
@@ -147,8 +143,6 @@ const Budgets = () => {
                         const isFull = b.status === "full";
                         const isExpired = b.status === "expired";
                         const status = b.status.charAt(0).toUpperCase() + b.status.slice(1);
-
-                    // Determine progress percent only for active budget
                         const currentProgress = isActive ? progressPercent : 100;
 
                         return (
