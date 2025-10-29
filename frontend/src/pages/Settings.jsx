@@ -6,7 +6,7 @@ import { useFetchProfile } from '../hooks';
 
 const Settings = () => {
     // const { user } = useFetchProfile();
-    const { fetchProfile, loading, error } = useFetchProfile()
+    const { user, loading, error } = useFetchProfile()
 
     const [username, setUsername] = useState("");
     const [phoneNumber, setPhoneNumber] = useState(null);
@@ -74,50 +74,21 @@ const Settings = () => {
         navigate('/login')
     }
 
-    
-    
     useEffect(() => {
-        const getUserProfile = async () => {
-            const data = await fetchProfile();
-            setUserData(data);
-            setUsername(data.username)
-            setPhoneNumber(data.phone_number)
-            setEmail(data.email)
+        if (user) {
+            setUserData(user);
+            setUsername(user.username);
+            setPhoneNumber(user.phone_number);
+            setEmail(user.email);
 
-            setEmailNotif(data.email_notification)
-            setSmsNotif(data.sms_notification)
-            setBudgetAlert(data.budget_alerts)
+            setEmailNotif(user.email_notification);
+            setSmsNotif(user.sms_notification);
+            setBudgetAlert(user.budget_alerts);
         }
-
-        getUserProfile();
-    }, [])
+    }, [user]);
 
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Failed to load profile</p>;
-
-    // useEffect(()  => {
-    //     try{
-    //         const fetchUserData = async () => {
-    //             const response = await api.get('api/profile/');
-    //             const data = response.data
-    //             console.log(data);
-    //             setUserData(data);
-    //             setUsername(data.username)
-    //             setPhoneNumber(data.phone_number)
-    //             setEmail(data.email)
-
-    //             setEmailNotif(data.email_notification)
-    //             setSmsNotif(data.sms_notification)
-    //             setBudgetAlert(data.budget_alerts)
-    //         }
-
-    //         fetchUserData();
-
-    //     }
-    //     catch(error){
-    //         console.log('Failed to get user data: ', error)
-    //     }
-    // }, [])
 
 
     return (
