@@ -91,7 +91,7 @@ const Settings = () => {
 
     return (
         <section className="mt-26 w-full mx-auto px-4">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-pink-500 bg-clip-text text-transparent leading-relaxed tracking-widest">
+            <h1 className="text-3xl font-bold leading-relaxed tracking-widest">
                 Settings & Profile
             </h1>
 

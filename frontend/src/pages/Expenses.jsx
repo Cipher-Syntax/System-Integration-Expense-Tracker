@@ -223,7 +223,7 @@ const Expenses = () => {
 
     return (
         <section className="mt-26 w-full px-4 sm:px-8 overflow-x-auto">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-pink-500 bg-clip-text text-transparent leading-relaxed tracking-widest">Expenses</h1>
+            <h1 className="text-3xl font-bold leading-relaxed tracking-widest">Expenses</h1>
 
             <div className='w-full mx-auto my-15'>
                 <div className="relative w-full sm:w-[900px] mx-auto mt-5">

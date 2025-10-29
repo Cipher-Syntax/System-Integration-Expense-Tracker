@@ -154,7 +154,7 @@ const Reports = () => {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
                 <div>
-                    <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-pink-600 to-pink-500 bg-clip-text text-transparent leading-relaxed tracking-wide">
+                    <h1 className="text-2xl sm:text-3xl font-bold leading-relaxed tracking-wide">
                         Reports & Analytics
                     </h1>
                     <p className="text-gray-600 text-sm mt-1">

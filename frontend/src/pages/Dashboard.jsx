@@ -117,7 +117,7 @@ const Dashboard = () => {
 
     return (
         <section className="mt-26 w-full px-4 sm:px-6 md:px-10">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-pink-500 bg-clip-text text-transparent leading-relaxed tracking-widest text-left">
+            <h1 className="text-3xl font-bold leading-relaxed tracking-widest text-left">
                 DASHBOARD
             </h1>
 
