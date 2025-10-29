@@ -31,7 +31,6 @@ const Form = ({ route, method }) => {
     const onSubmit = async (data) => {
         try{
             const response = await api.post(route, data, {withCredentials: true});
-            console.log(data)
             if(method === "login"){
                 if(remembered){
                     localStorage.setItem("rememberedUsername", data.username);
