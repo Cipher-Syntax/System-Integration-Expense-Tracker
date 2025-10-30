@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Wallet, TrendingUp, PieChart, ArrowRight } from "lucide-react";
+import { Wallet, TrendingUp, PieChart, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { LoadingIndicator } from "../components";
 import { useForm } from 'react-hook-form'
@@ -9,6 +9,9 @@ const Form = ({ route, method }) => {
     const { register, handleSubmit, formState: { errors, isSubmitting }, setValue } = useForm();
     const [error, setError] = useState("");
     const [remembered, setRemembered] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
     const navigate = useNavigate();
 
     const status = method == "login" ? "Login" : "Register";
@@ -29,6 +32,9 @@ const Form = ({ route, method }) => {
 
 
     const onSubmit = async (data) => {
+        if (data.phone_number) {
+            data.phone_number = data.phone_number.replace(/\s+/g, "");
+        }
         try{
             const response = await api.post(route, data, {withCredentials: true});
             if(method === "login"){
@@ -218,12 +224,26 @@ const Form = ({ route, method }) => {
                                         </label>
 
                                     </div>
+                                    <div className="relative">
                                     <input
-                                        type="password"
+                                        type={showPassword ? "text" : "password"}
                                         placeholder="••••••••"
-                                        {...register("password", {required: "Password is required", minLength: {value: 8, message: "At least 8 characters"}})}
+                                        {...register("password", {
+                                            required: "Password is required",
+                                            minLength: { value: 8, message: "At least 8 characters" },
+                                        })}
                                         className="w-full px-3 py-3 bg-gray-50 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-pink-500 focus:bg-white transition-all duration-300 text-xs text-gray-800 placeholder-gray-400 placeholder:leading-relaxed placeholder:tracking-widest"
                                     />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-pink-600"
+                                    >
+                                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                    </button>
+                                </div>
+                                {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
+
                                     {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
                                 </div>
 
@@ -233,16 +253,29 @@ const Form = ({ route, method }) => {
                                             <label className="block text-xs font-semibold text-gray-700 mb-0.5">
                                                 Confirm Password
                                             </label>
-                                            <input
-                                                type="password"
-                                                placeholder="••••••••"
-                                                {...register("confirm_password", {
-                                                required: "Please confirm your password",
-                                                validate: (value, { password }) =>
-                                                    value === password || "Passwords do not match",
-                                                })}
-                                                className="w-full px-3 py-3 bg-gray-50 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-pink-500 focus:bg-white transition-all duration-300 text-xs text-gray-800 placeholder-gray-400 placeholder:leading-relaxed placeholder:tracking-widest"
-                                            />
+                                            <div className="relative">
+                                                <input
+                                                    type={showConfirmPassword ? "text" : "password"}
+                                                    placeholder="••••••••"
+                                                    {...register("confirm_password", {
+                                                        required: "Please confirm your password",
+                                                        validate: (value, { password }) =>
+                                                            value === password || "Passwords do not match",
+                                                    })}
+                                                    className="w-full px-3 py-3 bg-gray-50 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-pink-500 focus:bg-white transition-all duration-300 text-xs text-gray-800 placeholder-gray-400 placeholder:leading-relaxed placeholder:tracking-widest"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                                    className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-pink-600"
+                                                >
+                                                    {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                                </button>
+                                            </div>
+                                            {errors.confirm_password && (
+                                                <p className="text-red-500 text-sm">{errors.confirm_password.message}</p>
+                                            )}
+
                                             {errors.confirm_password && (
                                                 <p className="text-red-500 text-sm">{errors.confirm_password.message}</p>
                                             )}

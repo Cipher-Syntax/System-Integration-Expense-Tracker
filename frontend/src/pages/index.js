@@ -8,6 +8,7 @@ import Expenses from "./Expenses";
 import Budgets from './Budgets';
 import Reports from "./Reports";
 import Settings from "./Settings";
+import PasswordResetConfirm from "./PasswordResetConfirm";
 
 export {
     Layout,
@@ -20,4 +21,5 @@ export {
     Budgets,
     Reports,
     Settings,
+    PasswordResetConfirm,
 }

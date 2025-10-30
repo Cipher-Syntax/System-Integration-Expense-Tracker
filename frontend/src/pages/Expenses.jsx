@@ -3,6 +3,7 @@ import { Search, Funnel, SquarePen, Trash2    } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import api from '../api/api';
 import { encryptId } from '../utils/CryptoUtils';
+import { LoadingIndicator } from '../components'
 
 const Expenses = () => {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -40,11 +41,15 @@ const Expenses = () => {
     const [budgets, setBudgets] = useState([]);
     const [amountError, setAmountError] = useState('');
     const isEditing = !!currentExpense.id;
+    const [loading, setLoading] = useState(false);
+
 
     const handleSave = async () => {
         try {
 
-             setAmountError('');
+            setAmountError('');
+            setLoading(true);
+
             if (currentExpense.budget && currentExpense.amount) {
                 const selectedBudget = budgets.find(
                     b => b.id === currentExpense.budget.id || b.id === currentExpense.budget
@@ -66,6 +71,7 @@ const Expenses = () => {
                         setAmountError(
                             `Adding this expense will exceed your budget limit of ₱${selectedBudget.limit_amount.toLocaleString()}.`
                         );
+                        setLoading(false)
                         return;
                     }
                 }
@@ -103,9 +109,15 @@ const Expenses = () => {
                 category: '',
                 budget: ''
             });
-        } catch (error) {
+
+            setTimeout(() => {
+                setLoading(false);
+            }, 5000);
+        } 
+        catch (error) {
             console.error("Failed to save expense:", error);
             console.log(error.response?.data);
+            setLoading(false)
         }
     };
 
@@ -356,46 +368,46 @@ const Expenses = () => {
                                 className="hover:bg-gray-50 transition-colors duration-200"
                             >
                                 <td className="py-2 border px-3 whitespace-nowrap">
-                                {expense.name}
+                                    {expense.name}
                                 </td>
                                 <td className="py-2 border px-3 whitespace-nowrap">
-                                {expense.category.name}
+                                    {expense.category.name}
                                 </td>
                                 <td className="py-2 border px-3">
-                                {expense.description ? expense.description : "-"}
+                                    {expense.description ? expense.description : "-"}
                                 </td>
                                 <td className="py-2 border px-3 whitespace-nowrap">
-                                {expense.date}
+                                    {expense.date}
                                 </td>
                                 <td className="py-2 border px-3 whitespace-nowrap">
-                                {Number(expense.amount).toLocaleString("en-PH", {
-                                    minimumFractionDigits: 2,
-                                    maximumFractionDigits: 2,
-                                })}
+                                    {Number(expense.amount).toLocaleString("en-PH", {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2,
+                                    })}
                                 </td>
                                 <td className="flex items-center justify-center gap-x-3 py-2 border px-3">
-                                <button
-                                    onClick={() => {
-                                    const params = new URLSearchParams(searchParams);
-                                    params.set("edit", encryptId(expense.id));
-                                    setSearchParams(params);
-                                    setCurrentExpense(expense);
-                                    setShowModal(true);
-                                    }}
-                                >
-                                    <SquarePen className="text-blue-500 cursor-pointer" />
-                                </button>
-                                <button onClick={() => handleDeleteClick(expense)}>
-                                    <Trash2 className="text-red-500 cursor-pointer" />
-                                </button>
+                                    <button
+                                        onClick={() => {
+                                        const params = new URLSearchParams(searchParams);
+                                        params.set("edit", encryptId(expense.id));
+                                        setSearchParams(params);
+                                        setCurrentExpense(expense);
+                                        setShowModal(true);
+                                        }}
+                                    >
+                                        <SquarePen className="text-blue-500 cursor-pointer" />
+                                    </button>
+                                    <button onClick={() => handleDeleteClick(expense)}>
+                                        <Trash2 className="text-red-500 cursor-pointer" />
+                                    </button>
                                 </td>
                             </tr>
                             ))
                         ) : (
                             <tr>
-                            <td colSpan={7} className="text-center py-4 text-gray-500">
-                                No Expenses
-                            </td>
+                                <td colSpan={7} className="text-center py-4 text-gray-500">
+                                    No Expenses
+                                </td>
                             </tr>
                         )}
                         </tbody>
@@ -603,7 +615,14 @@ const Expenses = () => {
                             </button>
                         </div>
                         </div>
+                        {loading && (
+                            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                                <LoadingIndicator />
+                            </div>
+                        )}
+
                     </div>
+                    
                 )}
 
 
