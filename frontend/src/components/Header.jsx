@@ -4,9 +4,6 @@ import { Link } from 'react-router-dom';
 import { useFetch } from '../hooks';
 
 const Header = () => {
-    // const { user, loading, error } = useFetchProfile()
-
-    // if (!user) return null
     const { data, loading, error } = useFetch('api/profile/');
 
     if (loading) return <p>Loading...</p>;
