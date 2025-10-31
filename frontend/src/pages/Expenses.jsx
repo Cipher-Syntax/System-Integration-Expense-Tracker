@@ -100,6 +100,7 @@ const Expenses = () => {
         }
     };
 
+
     const handleSave = async () => {
         try {
             setAmountError('');
@@ -107,32 +108,54 @@ const Expenses = () => {
 
             if (currentExpense.budget && currentExpense.amount) {
                 const selectedBudget = budgets.find(
-                    (b) => b.id === currentExpense.budget.id || b.id === currentExpense.budget
+                    (b) =>
+                        b.id === currentExpense.budget?.id ||
+                        String(b.id) === String(currentExpense.budget)
                 );
 
-                if (selectedBudget) {
-                    const budgetExpenses = expenses.filter(
-                        (exp) =>
-                            exp.budget === selectedBudget.id ||
-                            exp.budget?.id === selectedBudget.id
-                    );
+                if (!selectedBudget) {
+                    setAmountError('Selected budget not found. Please choose a valid budget.');
+                    setLoading(false);
+                    return;
+                }
 
-                    const currentTotal = budgetExpenses.reduce(
-                        (sum, exp) => sum + (exp.id === currentExpense.id ? 0 : parseFloat(exp.amount)),
-                        0
-                    );
+                if (currentExpense.date) {
+                    const expenseDate = new Date(currentExpense.date);
+                    const startDate = new Date(selectedBudget.start_date);
+                    const endDate = new Date(selectedBudget.end_date);
 
-                    const newTotal = currentTotal + parseFloat(currentExpense.amount);
-
-                    if (newTotal > parseFloat(selectedBudget.limit_amount)) {
+                    if (expenseDate < startDate || expenseDate > endDate) {
                         setAmountError(
-                            `Adding this expense will exceed your budget limit of ₱${selectedBudget.limit_amount.toLocaleString()}.`
+                            `Expense date must fall between ${selectedBudget.start_date} and ${selectedBudget.end_date}.`
                         );
+                        setShowModal(true);
                         setLoading(false);
                         return;
                     }
                 }
+
+                const budgetExpenses = expenses.filter(
+                    (exp) =>
+                        exp.budget === selectedBudget.id ||
+                        exp.budget?.id === selectedBudget.id
+                );
+
+                const currentTotal = budgetExpenses.reduce(
+                    (sum, exp) => sum + (exp.id === currentExpense.id ? 0 : parseFloat(exp.amount)),
+                    0
+                );
+
+                const newTotal = currentTotal + parseFloat(currentExpense.amount);
+
+                if (newTotal > parseFloat(selectedBudget.limit_amount)) {
+                    setAmountError(
+                        `Adding this expense will exceed your budget limit of ₱${selectedBudget.limit_amount.toLocaleString()}.`
+                    );
+                    setLoading(false);
+                    return;
+                }
             }
+
 
             const formattedDate = currentExpense.date
                 ? new Date(currentExpense.date).toISOString().split('T')[0]
@@ -173,10 +196,10 @@ const Expenses = () => {
             }, 3000);
         } catch (err) {
             console.error('Failed to save expense:', err);
-            console.log(err.response?.data);
             setLoading(false);
         }
     };
+
 
     const addNewCategory = async (name) => {
         try {

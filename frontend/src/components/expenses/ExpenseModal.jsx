@@ -101,7 +101,7 @@ const ExpenseModal = ({
                     <input
                         type="date"
                         name="date"
-                        value={form.date}
+                        value={form.date ? new Date(form.date).toISOString().split('T')[0] : ''}
                         onChange={handleChange}
                         className="border w-full mb-2 p-2 rounded"
                     />
@@ -116,7 +116,7 @@ const ExpenseModal = ({
                         onChange={handleChange}
                         className="border w-full mb-2 p-2 rounded"
                     />
-                    {amountError && <p className="text-red-500 text-sm mt-1">{amountError}</p>}
+                    {amountError && <p className="text-red-500 text-sm mt-2">{amountError}</p>}
                 </div>
 
                 <div>
