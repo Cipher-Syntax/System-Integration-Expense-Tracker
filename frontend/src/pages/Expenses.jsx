@@ -4,10 +4,10 @@ import { Link, useSearchParams } from 'react-router-dom';
 import api from '../api/api';
 import { encryptId } from '../utils/CryptoUtils';
 import { LoadingIndicator } from '../components'
+import { useFetch } from '../hooks'
 
 const Expenses = () => {
     const [searchParams, setSearchParams] = useSearchParams();
-
     const q = searchParams.get('q') || '';
     const category = searchParams.get('category') || '';
     const date = searchParams.get('date') || '';
@@ -21,9 +21,45 @@ const Expenses = () => {
         category: '',
         budget: ''
     });
-    
-    const [deleteTarget, setDeleteTarget] = useState(null);
 
+    // FOR ADDING NEW BUDGET
+    const [error, setError] = useState(null);
+    const [openModalForNewBudget, setOpenModalForNewBudget] = useState(false);
+    const [formDataBudget, setFormDataBudget] = useState({
+        limit_amount: "",
+        start_date: "",
+        end_date: "",
+    });
+
+    const handleSubmitNewBudget = async (e) => {
+        e.preventDefault();
+        setError("");
+
+        if (!formDataBudget.limit_amount || !formDataBudget.start_date || !formDataBudget.end_date) {
+            setError("All fields are required.");
+            return;
+        }
+
+        try {
+            const response = await api.post('api/budgets/', formDataBudget);
+            setBudgets((prev) => [...prev, response.data]);
+            
+            setOpenModalForNewBudget(false);
+            setFormDataBudget({
+                limit_amount: "",
+                start_date: "",
+                end_date: "",
+            });
+        } 
+        catch (err) {
+            console.error("Error saving budget:", err.response?.data || err.message);
+            setError("Failed to save. Check your data and try again.");
+        }
+    };
+
+    
+    // FOR DELETING
+    const [deleteTarget, setDeleteTarget] = useState(null);
     const handleDeleteClick = (expense) => {
         setDeleteTarget(expense);
     };
@@ -38,6 +74,7 @@ const Expenses = () => {
         }
     };
 
+    // FOR ADDING AND EDITING EXPENSES
     const [budgets, setBudgets] = useState([]);
     const [amountError, setAmountError] = useState('');
     const isEditing = !!currentExpense.id;
@@ -121,7 +158,7 @@ const Expenses = () => {
         }
     };
 
-
+    // FOR GETTING CATEGORIES AND FILTERING
     const [categories, setCategories] = useState([]);
     const [expenses, setExpenses] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
@@ -135,31 +172,31 @@ const Expenses = () => {
 
         const categoryMatch = category ? String(expense.category?.id) === String(category) : true;
 
+        const dateMatch = date ? new Date(expense.date).toLocaleString('default', { month: 'long' }).toLowerCase() === date.toLowerCase() : true;
 
-        const dateMatch = date
-            ? new Date(expense.date).toLocaleString('default', { month: 'long' }).toLowerCase() === date.toLowerCase()
-            : true;
-
-        const amountMatch = (() => {
+        const checkAmountMatch = () => {
             if (!amount) return true;
+
             const amt = expense.amount;
             if (amount === 'below-1000') return amt < 1000;
             if (amount === '1000-5000') return amt >= 1000 && amt <= 5000;
             if (amount === '5000-10000') return amt >= 5000 && amt <= 10000;
             if (amount === 'above-10000') return amt > 10000;
-            return true;
-        })();
 
+            return true;
+        };
+
+        const amountMatch = checkAmountMatch();
         return searchMatch && categoryMatch && dateMatch && amountMatch;
     });
 
-
+    // FOR PAGINATION
     const totalPages = Math.ceil(filteredExpenses.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
     const sortedExpenses = filteredExpenses.slice().sort((a, b) => b.id - a.id);
-
     const currentExpenses = sortedExpenses.slice(startIndex, startIndex + itemsPerPage);
 
+    // FOR CREATING NEW CATEGORY
     const [newCategory, setNewCategory] = useState(null);
     const [openModalForNewCategory, setOpenModalForNewCategory] =  useState(false);
 
@@ -181,38 +218,58 @@ const Expenses = () => {
         }
     }
 
-
+    const { data: categoriesData } = useFetch("api/categories/");
     useEffect(() => {
-        const fetchCategories = async () => {
-            try{
-                const response = await api.get('api/categories/');
-                setCategories(response.data)
-            }
-            catch(error){
-                console.error('Failed to fetch categories:', error);
-            }
+        if(categoriesData){
+            setCategories(categoriesData);
         }
+    }, [categoriesData])
 
-        fetchCategories();
-    }, [])
+    // useEffect(() => {
+    //     const fetchCategories = async () => {
+    //         try{
+    //             const response = await api.get('api/categories/');
+    //             setCategories(response.data)
+    //         }
+    //         catch(error){
+    //             console.error('Failed to fetch categories:', error);
+    //         }
+    //     }
 
+    //     fetchCategories();
+    // }, [])
+
+    const { data: expensesData } = useFetch("api/expenses/");
     useEffect(() => {
-        const fetchExpenses = async () => {
-            const response = await api.get('api/expenses/');
-            setExpenses(response.data);
+        if(expensesData){
+            setExpenses(expensesData);
         }
+    }, [expensesData])
 
-        fetchExpenses();
-    }, [])
+    // useEffect(() => {
+    //     const fetchExpenses = async () => {
+    //         const response = await api.get('api/expenses/');
+    //         setExpenses(response.data);
+    //     }
 
+    //     fetchExpenses();
+    // }, [])
+
+    const { data: budgetData } = useFetch("api/budgets/");
     useEffect(() => {
-        const fetchBudgets = async () => {
-            const response = await api.get('api/budgets/');
-            setBudgets(response.data);
+        if(budgetData){
+            setBudgets(budgetData)
         }
+    }, [budgetData])
 
-        fetchBudgets()
-    }, [])
+    // useEffect(() => {
+    //     const fetchBudgets = async () => {
+    //         const response = await api.get('api/budgets/');
+    //         setBudgets(response.data);
+    //     }
+
+    //     fetchBudgets()
+    // }, [])
     
     const closeModal = () => {
         const params = new URLSearchParams(searchParams);
@@ -499,35 +556,33 @@ const Expenses = () => {
 
                         {openModalForNewCategory && (
                             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-3 sm:px-0">
-                            <div className="bg-white p-4 sm:p-6 rounded-lg w-full max-w-[90%] sm:w-[350px]">
-                                <h2 className="text-lg font-semibold mb-4 text-center">
-                                Create New Category
-                                </h2>
-                                <input
-                                type="text"
-                                placeholder="Category name"
-                                value={newCategory || ''}
-                                onChange={(e) => setNewCategory(e.target.value)}
-                                className="border w-full mb-4 p-2 rounded"
-                                />
-                                <div className="flex flex-col sm:flex-row justify-end gap-3">
-                                <button
-                                    onClick={() => {
-                                    setOpenModalForNewCategory(false);
-                                    setNewCategory('');
-                                    }}
-                                    className="px-3 py-1 border rounded cursor-pointer w-full sm:w-auto"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    onClick={addNewCategory}
-                                    className="px-3 py-1 bg-pink-500 text-white rounded cursor-pointer w-full sm:w-auto"
-                                >
-                                    Save
-                                </button>
+                                <div className="bg-white p-4 sm:p-6 rounded-lg w-full max-w-[90%] sm:w-[350px]">
+                                    <h2 className="text-lg font-semibold mb-4 text-center">Create New Category</h2>
+                                    <input
+                                        type="text"
+                                        placeholder="Category name"
+                                        value={newCategory || ''}
+                                        onChange={(e) => setNewCategory(e.target.value)}
+                                        className="border w-full mb-4 p-2 rounded"
+                                    />
+                                    <div className="flex flex-col sm:flex-row justify-end gap-3">
+                                        <button
+                                            onClick={() => {
+                                            setOpenModalForNewCategory(false);
+                                            setNewCategory('');
+                                            }}
+                                            className="px-3 py-1 border rounded cursor-pointer w-full sm:w-auto"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            onClick={addNewCategory}
+                                            className="px-3 py-1 bg-pink-500 text-white rounded cursor-pointer w-full sm:w-auto"
+                                        >
+                                            Save
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
                             </div>
                         )}
 
@@ -574,12 +629,18 @@ const Expenses = () => {
                             <select
                             className="border w-full mb-2 p-2 rounded"
                             value={currentExpense.budget?.id || currentExpense.budget || ''}
-                            onChange={(e) =>
+                            onChange={(e) => {
+                                const value = e.target.value;
+
+                                if (value === "new-budget") {
+                                    setOpenModalForNewBudget(true);
+                                    return;
+                                }
                                 setCurrentExpense({
-                                ...currentExpense,
-                                budget: budgets.find((b) => b.id === parseInt(e.target.value)),
-                                })
-                            }
+                                    ...currentExpense,
+                                    budget: budgets.find((b) => b.id === parseInt(value)),
+                                });
+                            }}
                             >
                             <option value="">Select Budget</option>
                             {budgets.filter((b) => b.status === "active").length > 0 ? (
@@ -595,10 +656,97 @@ const Expenses = () => {
                                     </option>
                                 ))
                             ) : (
-                                <option disabled>No active budgets yet</option>
+                                <option value="new-budget">Create a budget</option>
                             )}
                             </select>
                         </div>
+
+                        {
+                            openModalForNewBudget && (
+                                <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
+                                    <div className="bg-white rounded-xl p-8 w-[400px] shadow-2xl">
+                                        <h2 className="text-lg font-semibold mb-4">
+                                            Create New Budget
+                                        </h2>
+
+                                        
+                                        <div className='space-y-3'>
+                                            <label className="block mb-1 text-sm font-medium">
+                                                Limit Amount
+                                            </label>
+
+                                            <input
+                                                type="number"
+                                                placeholder="Enter amount"
+                                                value={formDataBudget.limit_amount}
+                                                onChange={(e) =>
+                                                    setFormDataBudget({
+                                                        ...formDataBudget,
+                                                        limit_amount: e.target.value,
+                                                    })
+                                                }
+                                                className="w-full border p-2 rounded"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block mb-1 text-sm font-medium">
+                                                Start Date
+                                            </label>
+                                            <input
+                                                type="date"
+                                                value={formDataBudget.start_date}
+                                                onChange={(e) =>
+                                                    setFormDataBudget({
+                                                        ...formDataBudget,
+                                                        start_date: e.target.value,
+                                                    })
+                                                }
+                                                className="w-full border p-2 rounded"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block mb-1 text-sm font-medium">
+                                                End Date
+                                            </label>
+                                            <input
+                                                type="date"
+                                                value={formDataBudget.end_date}
+                                                onChange={(e) =>
+                                                    setFormDataBudget({
+                                                        ...formDataBudget,
+                                                        end_date: e.target.value,
+                                                    })
+                                                }
+                                                className="w-full border p-2 rounded"
+                                            />
+                                        </div>
+
+                                        {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+
+                                        <div className="flex justify-end gap-3 mt-4">
+                                        <button
+                                            type="button"
+                                            onClick={() => setOpenModalForNewBudget(false)}
+                                            className="px-4 py-2 border rounded hover:bg-gray-50 transition-colors"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            onClick={handleSubmitNewBudget}
+                                            className="px-4 py-2 bg-pink-500 text-white rounded hover:bg-pink-600 transition-colors"
+                                        >
+                                            Create
+                                        </button>
+                                    </div>
+
+
+
+                                    </div>
+                                </div>
+                            )
+                        }
 
                         <div className="flex flex-col sm:flex-row justify-end gap-3 mt-3">
                             <button

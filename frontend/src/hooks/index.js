@@ -1,5 +1,5 @@
-import useFetchProfile from "./useFetchProfile";
+import useFetch from "./useFetch";
 
 export {
-    useFetchProfile,
+    useFetch,
 }

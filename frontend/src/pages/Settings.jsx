@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react'
 import { Mail, Phone, Bell, CheckCircle, CircleUser, SquarePen, Trash2  } from "lucide-react";
 import api from '../api/api';
 import { useNavigate } from 'react-router-dom';
-import { useFetchProfile } from '../hooks';
+import { useFetch } from '../hooks';
 
 const Settings = () => {
     // const { user } = useFetchProfile();
-    const { user, loading, error } = useFetchProfile()
+    // const { user, loading, error } = useFetchProfile()
+    const { data, loading, error } = useFetch('api/profile');
 
     const [username, setUsername] = useState("");
     const [phoneNumber, setPhoneNumber] = useState(null);
@@ -73,17 +74,17 @@ const Settings = () => {
     }
 
     useEffect(() => {
-        if (user) {
-            setUserData(user);
-            setUsername(user.username);
-            setPhoneNumber(user.phone_number);
-            setEmail(user.email);
+        if (data) {
+            setUserData(data);
+            setUsername(data.username);
+            setPhoneNumber(data.phone_number);
+            setEmail(data.email);
 
-            setEmailNotif(user.email_notification);
-            setSmsNotif(user.sms_notification);
-            setBudgetAlert(user.budget_alerts);
+            setEmailNotif(data.email_notification);
+            setSmsNotif(data.sms_notification);
+            setBudgetAlert(data.budget_alerts);
         }
-    }, [user]);
+    }, [data]);
 
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Failed to load profile</p>;

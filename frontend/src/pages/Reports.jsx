@@ -2,6 +2,7 @@ import React, { useState, useEffect} from "react";
 import { Download, TrendingUp, Circle, BarChart3, DollarSign } from "lucide-react";
 import { Area, AreaChart, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import api from "../api/api";
+import { useFetch } from "../hooks";
 
 const Reports = () => {
     const [budgets, setBudgets] = useState([]);
@@ -11,7 +12,7 @@ const Reports = () => {
     const [expenses, setExpenses] = useState([]);
     const [rawExpenses, setRawExpenses] = useState([]);
     const [categories, setCategories] = useState([]);
-
+    
     useEffect(() => {
         const fetchData = async () => {
             try {

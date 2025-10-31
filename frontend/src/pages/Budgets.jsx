@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Plus, Edit2, Trash2 } from "lucide-react";
 import api from "../api/api";
+import { useFetch } from '../hooks'
 
 const Budgets = () => {
     const [budgets, setBudgets] = useState([]);
@@ -19,38 +20,55 @@ const Budgets = () => {
         end_date: "",
     });
 
-    const fetchBudgets = async () => {
-        try {
-            const response = await api.get("api/budgets/");
-            setBudgets(response.data);
+    const { data: budgetData, loading, errorData } = useFetch("api/budgets/");
+    useEffect(() => {
+        if(budgetData){
+            setBudgets(budgetData);
 
-            const current = response.data.find((b) => b.status === "active");
+            const current = budgetData.find((b) => b.status === "active");
             setActiveBudget(current || null);
             setExpenseTracker(current ? current.limit_amount : null);
-        } 
-        catch (err) {
-            console.error("Failed to fetch budgets:", err);
         }
-    };
+    }, [budgetData])
 
+    // const fetchBudgets = async () => {
+    //     try {
+    //         const response = await api.get("api/budgets/");
+    //         setBudgets(response.data);
+
+    //         const current = response.data.find((b) => b.status === "active");
+    //         setActiveBudget(current || null);
+    //         setExpenseTracker(current ? current.limit_amount : null);
+    //     } 
+    //     catch (err) {
+    //         console.error("Failed to fetch budgets:", err);
+    //     }
+    // };
+
+    // useEffect(() => {
+    //     fetchBudgets();
+    // }, []);
+
+    const { data: totalExpensesData } = useFetch("api/budgets/total_expenses/");
     useEffect(() => {
-        fetchBudgets();
-    }, []);
-
-
-    useEffect(() => {
-        const fetchTotalExpenses = async () => {
-            try{
-                const response = await api.get('api/budgets/total_expenses/');
-                setTotalExpenses(response.data.total_expenses);
-            }
-            catch(error){
-                console.log('Failed to get total expenses: ', error)
-            }
+        if(totalExpensesData){
+            setTotalExpenses(totalExpensesData.total_expenses);
         }
+    }, [totalExpensesData])
 
-        fetchTotalExpenses()
-    }, [])
+    // useEffect(() => {
+    //     const fetchTotalExpenses = async () => {
+    //         try{
+    //             const response = await api.get('api/budgets/total_expenses/');
+    //             setTotalExpenses(response.data.total_expenses);
+    //         }
+    //         catch(error){
+    //             console.log('Failed to get total expenses: ', error)
+    //         }
+    //     }
+
+    //     fetchTotalExpenses()
+    // }, [])
 
    
 
@@ -109,6 +127,9 @@ const Budgets = () => {
         });
         setShowModal(true);
     };
+
+    if (loading) return <p>Loading...</p>;
+    if (errorData) return <p>Failed to load profile</p>;
 
     return (
         <section className="mt-26 w-full mx-auto px-4">
