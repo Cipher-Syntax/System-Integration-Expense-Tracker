@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Funnel, SquarePen, Trash2    } from 'lucide-react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Search, Funnel } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
 import api from '../api/api';
+import { LoadingIndicator } from '../components';
+import { useFetch } from '../hooks';
+import { ExpenseFilters, ExpenseList, PaginationControls, ExpenseModal, CategoryModal, BudgetModal, DeleteExpenseModal } from '../components/expenses'
 import { encryptId } from '../utils/CryptoUtils';
-import { LoadingIndicator } from '../components'
-import { useFetch } from '../hooks'
 
 const Expenses = () => {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -12,6 +13,7 @@ const Expenses = () => {
     const category = searchParams.get('category') || '';
     const date = searchParams.get('date') || '';
     const amount = searchParams.get('amount') || '';
+
     const [showModal, setShowModal] = useState(false);
     const [currentExpense, setCurrentExpense] = useState({
         name: '',
@@ -22,44 +24,68 @@ const Expenses = () => {
         budget: ''
     });
 
-    // FOR ADDING NEW BUDGET
     const [error, setError] = useState(null);
     const [openModalForNewBudget, setOpenModalForNewBudget] = useState(false);
+    const [openModalForNewCategory, setOpenModalForNewCategory] = useState(false);
     const [formDataBudget, setFormDataBudget] = useState({
-        limit_amount: "",
-        start_date: "",
-        end_date: "",
+        limit_amount: '',
+        start_date: '',
+        end_date: ''
     });
+
+    const [deleteTarget, setDeleteTarget] = useState(null);
+    const [budgets, setBudgets] = useState([]);
+    const [amountError, setAmountError] = useState('');
+    const isEditing = !!currentExpense.id;
+    const [loading, setLoading] = useState(false);
+
+    const [categories, setCategories] = useState([]);
+    const [expenses, setExpenses] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 5;
+
+    const { data: categoriesData } = useFetch('api/categories/');
+    const { data: expensesData } = useFetch('api/expenses/');
+    const { data: budgetData } = useFetch('api/budgets/');
+
+    useEffect(() => {
+        if (categoriesData) setCategories(categoriesData);
+    }, [categoriesData]);
+
+    useEffect(() => {
+        if (expensesData) setExpenses(expensesData);
+    }, [expensesData]);
+
+    useEffect(() => {
+        if (budgetData) setBudgets(budgetData);
+    }, [budgetData]);
+
 
     const handleSubmitNewBudget = async (e) => {
         e.preventDefault();
-        setError("");
+        setError('');
 
         if (!formDataBudget.limit_amount || !formDataBudget.start_date || !formDataBudget.end_date) {
-            setError("All fields are required.");
+            setError('All fields are required.');
             return;
         }
 
         try {
             const response = await api.post('api/budgets/', formDataBudget);
             setBudgets((prev) => [...prev, response.data]);
-            
+
             setOpenModalForNewBudget(false);
             setFormDataBudget({
-                limit_amount: "",
-                start_date: "",
-                end_date: "",
+                limit_amount: '',
+                start_date: '',
+                end_date: ''
             });
-        } 
-        catch (err) {
-            console.error("Error saving budget:", err.response?.data || err.message);
-            setError("Failed to save. Check your data and try again.");
+        } catch (err) {
+            console.error('Error saving budget:', err.response?.data || err.message);
+            setError('Failed to save. Check your data and try again.');
         }
     };
 
-    
-    // FOR DELETING
-    const [deleteTarget, setDeleteTarget] = useState(null);
     const handleDeleteClick = (expense) => {
         setDeleteTarget(expense);
     };
@@ -69,32 +95,26 @@ const Expenses = () => {
             await api.delete(`api/expenses/${deleteTarget.id}/`);
             setExpenses((prev) => prev.filter((exp) => exp.id !== deleteTarget.id));
             setDeleteTarget(null);
-        } catch (error) {
-            console.error("Failed to delete expense:", error);
+        } catch (err) {
+            console.error('Failed to delete expense:', err);
         }
     };
 
-    // FOR ADDING AND EDITING EXPENSES
-    const [budgets, setBudgets] = useState([]);
-    const [amountError, setAmountError] = useState('');
-    const isEditing = !!currentExpense.id;
-    const [loading, setLoading] = useState(false);
-
-
     const handleSave = async () => {
         try {
-
             setAmountError('');
             setLoading(true);
 
             if (currentExpense.budget && currentExpense.amount) {
                 const selectedBudget = budgets.find(
-                    b => b.id === currentExpense.budget.id || b.id === currentExpense.budget
+                    (b) => b.id === currentExpense.budget.id || b.id === currentExpense.budget
                 );
 
                 if (selectedBudget) {
                     const budgetExpenses = expenses.filter(
-                        exp => exp.budget === selectedBudget.id || exp.budget?.id === selectedBudget.id
+                        (exp) =>
+                            exp.budget === selectedBudget.id ||
+                            exp.budget?.id === selectedBudget.id
                     );
 
                     const currentTotal = budgetExpenses.reduce(
@@ -108,14 +128,15 @@ const Expenses = () => {
                         setAmountError(
                             `Adding this expense will exceed your budget limit of ₱${selectedBudget.limit_amount.toLocaleString()}.`
                         );
-                        setLoading(false)
+                        setLoading(false);
                         return;
                     }
                 }
             }
 
-
-            const formattedDate = currentExpense.date ? new Date(currentExpense.date).toISOString().split("T")[0] : null;
+            const formattedDate = currentExpense.date
+                ? new Date(currentExpense.date).toISOString().split('T')[0]
+                : null;
 
             const payload = {
                 name: currentExpense.name,
@@ -123,7 +144,7 @@ const Expenses = () => {
                 date: formattedDate,
                 amount: currentExpense.amount,
                 category_id: currentExpense.category?.id || currentExpense.category,
-                budget: currentExpense.budget.id || null,
+                budget: currentExpense.budget?.id || currentExpense.budget || null
             };
 
             let response;
@@ -133,7 +154,7 @@ const Expenses = () => {
                     prev.map((exp) => (exp.id === currentExpense.id ? response.data : exp))
                 );
             } else {
-                response = await api.post(`api/expenses/`, payload);
+                response = await api.post('api/expenses/', payload);
                 setExpenses((prev) => [...prev, response.data]);
             }
 
@@ -149,22 +170,47 @@ const Expenses = () => {
 
             setTimeout(() => {
                 setLoading(false);
-            }, 5000);
-        } 
-        catch (error) {
-            console.error("Failed to save expense:", error);
-            console.log(error.response?.data);
-            setLoading(false)
+            }, 3000);
+        } catch (err) {
+            console.error('Failed to save expense:', err);
+            console.log(err.response?.data);
+            setLoading(false);
         }
     };
 
-    // FOR GETTING CATEGORIES AND FILTERING
-    const [categories, setCategories] = useState([]);
-    const [expenses, setExpenses] = useState([]);
-    const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 5;
+    const addNewCategory = async (name) => {
+        try {
+            const response = await api.post('api/categories/', { name });
+            setCategories((prev) => [...prev, response.data]);
+            setCurrentExpense((prev) => ({
+                ...prev,
+                category: response.data
+            }));
+        } catch (err) {
+            console.error('Failed to create category:', err);
+        }
+    };
 
-    const filteredExpenses = expenses.filter(expense => {
+    const closeModal = () => {
+        const params = new URLSearchParams(searchParams);
+        params.delete('edit');
+        setSearchParams(params);
+        setShowModal(false);
+    };
+
+
+    useEffect(() => {
+        const editId = searchParams.get('edit');
+        if (editId && expenses.length > 0) {
+            const expenseToEdit = expenses.find((exp) => exp.id === parseInt(editId));
+            if (expenseToEdit) {
+                setCurrentExpense(expenseToEdit);
+                setShowModal(true);
+            }
+        }
+    }, [searchParams, expenses, setSearchParams]);
+
+    const filteredExpenses = expenses.filter((expense) => {
         const searchMatch =
             expense.name.toLowerCase().includes(q.toLowerCase()) ||
             expense.description?.toLowerCase().includes(q.toLowerCase()) ||
@@ -172,7 +218,11 @@ const Expenses = () => {
 
         const categoryMatch = category ? String(expense.category?.id) === String(category) : true;
 
-        const dateMatch = date ? new Date(expense.date).toLocaleString('default', { month: 'long' }).toLowerCase() === date.toLowerCase() : true;
+        const dateMatch = date
+            ? new Date(expense.date)
+                  .toLocaleString('default', { month: 'long' })
+                  .toLowerCase() === date.toLowerCase()
+            : true;
 
         const checkAmountMatch = () => {
             if (!amount) return true;
@@ -190,619 +240,106 @@ const Expenses = () => {
         return searchMatch && categoryMatch && dateMatch && amountMatch;
     });
 
-    // FOR PAGINATION
+    // Pagination
     const totalPages = Math.ceil(filteredExpenses.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
     const sortedExpenses = filteredExpenses.slice().sort((a, b) => b.id - a.id);
     const currentExpenses = sortedExpenses.slice(startIndex, startIndex + itemsPerPage);
 
-    // FOR CREATING NEW CATEGORY
-    const [newCategory, setNewCategory] = useState(null);
-    const [openModalForNewCategory, setOpenModalForNewCategory] =  useState(false);
-
-    const addNewCategory = async () => {
-        try {
-            const response = await api.post('api/categories/', {
-                name: newCategory,
-            });
-            setCategories((prev) => [...prev, response.data]);
-            setCurrentExpense((prev) => ({
-                ...prev,
-                category: response.data,
-            }));
-            setOpenModalForNewCategory(false);
-            setNewCategory('');
-        } 
-        catch (error) {
-            console.error('Failed to create category:', error);
-        }
-    }
-
-    const { data: categoriesData } = useFetch("api/categories/");
-    useEffect(() => {
-        if(categoriesData){
-            setCategories(categoriesData);
-        }
-    }, [categoriesData])
-
-    // useEffect(() => {
-    //     const fetchCategories = async () => {
-    //         try{
-    //             const response = await api.get('api/categories/');
-    //             setCategories(response.data)
-    //         }
-    //         catch(error){
-    //             console.error('Failed to fetch categories:', error);
-    //         }
-    //     }
-
-    //     fetchCategories();
-    // }, [])
-
-    const { data: expensesData } = useFetch("api/expenses/");
-    useEffect(() => {
-        if(expensesData){
-            setExpenses(expensesData);
-        }
-    }, [expensesData])
-
-    // useEffect(() => {
-    //     const fetchExpenses = async () => {
-    //         const response = await api.get('api/expenses/');
-    //         setExpenses(response.data);
-    //     }
-
-    //     fetchExpenses();
-    // }, [])
-
-    const { data: budgetData } = useFetch("api/budgets/");
-    useEffect(() => {
-        if(budgetData){
-            setBudgets(budgetData)
-        }
-    }, [budgetData])
-
-    // useEffect(() => {
-    //     const fetchBudgets = async () => {
-    //         const response = await api.get('api/budgets/');
-    //         setBudgets(response.data);
-    //     }
-
-    //     fetchBudgets()
-    // }, [])
-    
-    const closeModal = () => {
-        const params = new URLSearchParams(searchParams);
-        params.delete('edit');
-        setSearchParams(params);
-        setShowModal(false);
-    };
-
-    useEffect(() => {
-        const editId = searchParams.get('edit');
-        if (editId && expenses.length > 0) {
-            const expenseToEdit = expenses.find(exp => exp.id === parseInt(editId));
-            if (expenseToEdit) {
-            setCurrentExpense(expenseToEdit);
-            setShowModal(true);
-            }
-        }
-    }, [searchParams, expenses]);
-
-
     return (
         <section className="mt-26 w-full px-4 sm:px-8 overflow-x-auto">
             <h1 className="text-3xl font-bold leading-relaxed tracking-widest">Expenses</h1>
 
-            <div className='w-full mx-auto my-15'>
-                <div className="relative w-full sm:w-[900px] mx-auto mt-5">
-                    <Search className='absolute left-4 sm:left-6 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5' />
-                    <input 
-                        type="text"
-                        placeholder="Search expenses..."
-                        value={q}
-                        onChange={(e) => {
-                            const params = new URLSearchParams(searchParams);
-                            params.set('q', e.target.value);
-                            setSearchParams(params);
-                        }}
-                        className="w-full py-3 px-15 bg-white text-gray-500 rounded-full focus:outline-pink-400 text-base text-md border"
-                    />
+            <div className="w-full mx-auto my-15">
+                <ExpenseFilters
+                    q={q}
+                    category={category}
+                    date={date}
+                    amount={amount}
+                    categories={categories}
+                    searchParams={searchParams}
+                    setSearchParams={setSearchParams}
+                    onAdd={() => {
+                        setCurrentExpense({
+                            name: '',
+                            description: '',
+                            date: '',
+                            amount: '',
+                            category: '',
+                            budget: ''
+                        });
+                        setShowModal(true);
+                    }}
+                />
 
+                <ExpenseList
+                    currentExpenses={currentExpenses}
+                    searchParams={searchParams}
+                    setSearchParams={setSearchParams}
+                    setCurrentExpense={setCurrentExpense}
+                    setShowModal={setShowModal}
+                    handleDeleteClick={handleDeleteClick}
+                />
 
-                </div>
-
-                <div className="mt-15 w-full">
-                    <div className="flex items-center gap-x-3">
-                        <Funnel />
-                        <h2>Filter by:</h2>
-                    </div>
-
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-3 text-gray-600 gap-4">
-                        {/* Filters */}
-                        <div className="w-full sm:w-auto flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-x-5">
-                            {/* Category */}
-                            <select
-                                value={category}
-                                onChange={(e) => {
-                                const params = new URLSearchParams(searchParams);
-                                params.set("category", e.target.value);
-                                setSearchParams(params);
-                                }}
-                                className="border w-full sm:w-[200px] py-1 px-2 rounded-full"
-                            >
-                                <option value="">Category</option>
-                                {categories.map((cat) => (
-                                <option key={cat.id} value={cat.id}>
-                                    {cat.name}
-                                </option>
-                                ))}
-                            </select>
-
-                            {/* Date */}
-                            <select
-                                value={date}
-                                onChange={(e) => {
-                                const params = new URLSearchParams(searchParams);
-                                params.set("date", e.target.value);
-                                setSearchParams(params);
-                                }}
-                                className="border w-full sm:w-[200px] py-1 px-2 rounded-full"
-                            >
-                                <option value="">Date</option>
-                                <option value="january">January</option>
-                                <option value="february">February</option>
-                                <option value="march">March</option>
-                                <option value="april">April</option>
-                                <option value="may">May</option>
-                                <option value="june">June</option>
-                                <option value="july">July</option>
-                                <option value="august">August</option>
-                                <option value="september">September</option>
-                                <option value="october">October</option>
-                                <option value="november">November</option>
-                                <option value="december">December</option>
-                            </select>
-
-                            {/* Amount */}
-                            <select
-                                value={amount}
-                                onChange={(e) => {
-                                const params = new URLSearchParams(searchParams);
-                                params.set("amount", e.target.value);
-                                setSearchParams(params);
-                                }}
-                                className="border w-full sm:w-[200px] py-1 px-2 rounded-full"
-                            >
-                                <option value="">Amount</option>
-                                <option value="below-1000">Below ₱ 1,000</option>
-                                <option value="1000-5000">₱ 1,000 – ₱ 5,000</option>
-                                <option value="5000-10000">₱ 5,000 – ₱ 10,000</option>
-                                <option value="above-10000">Above ₱ 10,000</option>
-                            </select>
-                            </div>
-
-                            {/* Add Expense Button */}
-                            <button
-                            className="w-full sm:w-[250px] py-2 px-2 bg-pink-500 text-white text-center rounded-md font-bold cursor-pointer"
-                            onClick={() => {
-                                setCurrentExpense({
-                                name: "",
-                                description: "",
-                                date: "",
-                                amount: "",
-                                category: "",
-                                budget: "",
-                                });
-                                setShowModal(true);
-                            }}
-                            >
-                            Add Expense
-                            </button>
-                        </div>
-                    </div>
-
-
-                {/* Expenses table */}
-                <div className="overflow-x-auto mt-10">
-                    <table className="min-w-[700px] w-full text-gray-500 text-sm sm:text-base">
-                        <thead className="border text-center bg-gray-50">
-                        <tr>
-                            <th className="py-2 border px-2">Expense</th>
-                            <th className="py-2 border px-2">Category</th>
-                            <th className="py-2 border px-2">Description</th>
-                            <th className="py-2 border px-2">Date</th>
-                            <th className="py-2 border px-2">Amount</th>
-                            <th className="py-2 border px-2">Action</th>
-                        </tr>
-                        </thead>
-
-                        <tbody>
-                        {currentExpenses.length > 0 ? (
-                            currentExpenses.map((expense) => (
-                            <tr
-                                key={expense.id}
-                                className="hover:bg-gray-50 transition-colors duration-200"
-                            >
-                                <td className="py-2 border px-3 whitespace-nowrap">
-                                    {expense.name}
-                                </td>
-                                <td className="py-2 border px-3 whitespace-nowrap">
-                                    {expense.category.name}
-                                </td>
-                                <td className="py-2 border px-3">
-                                    {expense.description ? expense.description : "-"}
-                                </td>
-                                <td className="py-2 border px-3 whitespace-nowrap">
-                                    {expense.date}
-                                </td>
-                                <td className="py-2 border px-3 whitespace-nowrap">
-                                    {Number(expense.amount).toLocaleString("en-PH", {
-                                        minimumFractionDigits: 2,
-                                        maximumFractionDigits: 2,
-                                    })}
-                                </td>
-                                <td className="flex items-center justify-center gap-x-3 py-2 border px-3">
-                                    <button
-                                        onClick={() => {
-                                        const params = new URLSearchParams(searchParams);
-                                        params.set("edit", encryptId(expense.id));
-                                        setSearchParams(params);
-                                        setCurrentExpense(expense);
-                                        setShowModal(true);
-                                        }}
-                                    >
-                                        <SquarePen className="text-blue-500 cursor-pointer" />
-                                    </button>
-                                    <button onClick={() => handleDeleteClick(expense)}>
-                                        <Trash2 className="text-red-500 cursor-pointer" />
-                                    </button>
-                                </td>
-                            </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan={7} className="text-center py-4 text-gray-500">
-                                    No Expenses
-                                </td>
-                            </tr>
-                        )}
-                        </tbody>
-                    </table>
-                </div>
-
-
-                {/* Pagination */}
-                <div className="flex items-center justify-center gap-2 mt-10">
-                    <button
-                        onClick={() => setCurrentPage(1)}
-                        disabled={currentPage === 1}
-                        className="px-3 py-1 border rounded disabled:opacity-50 cursor-pointer"
-                    >
-                        First
-                    </button>
-
-                    {
-                        [...Array(totalPages)].map((_, index) => {
-                            const page = index + 1;
-                            return (
-                                <button
-                                    key={page}
-                                    onClick={() => setCurrentPage(page)}
-                                    className={`w-8 h-8 border rounded cursor-pointer ${
-                                    currentPage === page ? 'bg-pink-500 text-white' : ''
-                                    }`}
-                                >
-                                    {page}
-                                </button>
-                            );
-                        })
-                    }
-
-                    <button
-                        onClick={() => setCurrentPage(totalPages)}
-                        disabled={currentPage === totalPages}
-                        className="px-3 py-1 border rounded disabled:opacity-50 cursor-pointer"
-                    >
-                        Last
-                    </button>
-                </div>
+                <PaginationControls
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    setCurrentPage={setCurrentPage}
+                />
 
                 {showModal && (
-                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-3 sm:px-0">
-                        <div className="bg-white p-4 sm:p-6 rounded-lg w-full max-w-[90%] sm:w-[400px]">
-                        <h2 className="text-lg font-semibold mb-3 text-center sm:text-left">
-                            {isEditing ? "Edit Expense" : "Add New Expense"}
-                        </h2>
-
-                        <div>
-                            <label>Expense</label>
-                            <input
-                            type="text"
-                            value={currentExpense.name}
-                            onChange={(e) => setCurrentExpense({ ...currentExpense, name: e.target.value })}
-                            className="border w-full mb-2 p-2 rounded"
-                            />
-                        </div>
-
-                        <div>
-                            <label>Category</label>
-                            <select
-                            className="border w-full mb-2 p-2 rounded"
-                            value={currentExpense.category?.id || currentExpense.category || ''}
-                            onChange={(e) => {
-                                const selectedValue = e.target.value;
-
-                                if (selectedValue === "new-category") {
-                                setOpenModalForNewCategory(true);
-                                } else {
-                                const selectedCategory = categories.find(
-                                    (cat) => cat.id === parseInt(selectedValue)
-                                );
-                                setCurrentExpense({
-                                    ...currentExpense,
-                                    category: selectedCategory || '',
-                                });
-                                }
-                            }}
-                            >
-                            <option value="">Select Category</option>
-                            {categories.map((cat) => (
-                                <option key={cat.id} value={cat.id}>{cat.name}</option>
-                            ))}
-                            <option value="new-category">Create New Category</option>
-                            </select>
-                        </div>
-
-                        {openModalForNewCategory && (
-                            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-3 sm:px-0">
-                                <div className="bg-white p-4 sm:p-6 rounded-lg w-full max-w-[90%] sm:w-[350px]">
-                                    <h2 className="text-lg font-semibold mb-4 text-center">Create New Category</h2>
-                                    <input
-                                        type="text"
-                                        placeholder="Category name"
-                                        value={newCategory || ''}
-                                        onChange={(e) => setNewCategory(e.target.value)}
-                                        className="border w-full mb-4 p-2 rounded"
-                                    />
-                                    <div className="flex flex-col sm:flex-row justify-end gap-3">
-                                        <button
-                                            onClick={() => {
-                                            setOpenModalForNewCategory(false);
-                                            setNewCategory('');
-                                            }}
-                                            className="px-3 py-1 border rounded cursor-pointer w-full sm:w-auto"
-                                        >
-                                            Cancel
-                                        </button>
-                                        <button
-                                            onClick={addNewCategory}
-                                            className="px-3 py-1 bg-pink-500 text-white rounded cursor-pointer w-full sm:w-auto"
-                                        >
-                                            Save
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        <div>
-                            <label>Description</label>
-                            <textarea
-                            value={currentExpense.description}
-                            onChange={(e) =>
-                                setCurrentExpense({ ...currentExpense, description: e.target.value })
-                            }
-                            className="border w-full mb-2 p-2 rounded"
-                            ></textarea>
-                        </div>
-
-                        <div>
-                            <label>Date</label>
-                            <input
-                            type="date"
-                            value={currentExpense.date}
-                            onChange={(e) =>
-                                setCurrentExpense({ ...currentExpense, date: e.target.value })
-                            }
-                            className="border w-full mb-2 p-2 rounded"
-                            />
-                        </div>
-
-                        <div>
-                            <label>Amount</label>
-                            <input
-                            type="number"
-                            value={currentExpense.amount}
-                            onChange={(e) =>
-                                setCurrentExpense({ ...currentExpense, amount: e.target.value })
-                            }
-                            className="border w-full mb-2 p-2 rounded"
-                            />
-                            {amountError && (
-                            <p className="text-red-500 text-sm mt-1">{amountError}</p>
-                            )}
-                        </div>
-
-                        <div>
-                            <label>Budget</label>
-                            <select
-                            className="border w-full mb-2 p-2 rounded"
-                            value={currentExpense.budget?.id || currentExpense.budget || ''}
-                            onChange={(e) => {
-                                const value = e.target.value;
-
-                                if (value === "new-budget") {
-                                    setOpenModalForNewBudget(true);
-                                    return;
-                                }
-                                setCurrentExpense({
-                                    ...currentExpense,
-                                    budget: budgets.find((b) => b.id === parseInt(value)),
-                                });
-                            }}
-                            >
-                            <option value="">Select Budget</option>
-                            {budgets.filter((b) => b.status === "active").length > 0 ? (
-                                budgets
-                                .filter((b) => b.status === "active")
-                                .map((b) => (
-                                    <option key={b.id} value={b.id}>
-                                    ₱{" "}
-                                    {Number(b.limit_amount).toLocaleString("en-PH", {
-                                        minimumFractionDigits: 2,
-                                        maximumFractionDigits: 2,
-                                    })}
-                                    </option>
-                                ))
-                            ) : (
-                                <option value="new-budget">Create a budget</option>
-                            )}
-                            </select>
-                        </div>
-
-                        {
-                            openModalForNewBudget && (
-                                <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
-                                    <div className="bg-white rounded-xl p-8 w-[400px] shadow-2xl">
-                                        <h2 className="text-lg font-semibold mb-4">
-                                            Create New Budget
-                                        </h2>
-
-                                        
-                                        <div className='space-y-3'>
-                                            <label className="block mb-1 text-sm font-medium">
-                                                Limit Amount
-                                            </label>
-
-                                            <input
-                                                type="number"
-                                                placeholder="Enter amount"
-                                                value={formDataBudget.limit_amount}
-                                                onChange={(e) =>
-                                                    setFormDataBudget({
-                                                        ...formDataBudget,
-                                                        limit_amount: e.target.value,
-                                                    })
-                                                }
-                                                className="w-full border p-2 rounded"
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label className="block mb-1 text-sm font-medium">
-                                                Start Date
-                                            </label>
-                                            <input
-                                                type="date"
-                                                value={formDataBudget.start_date}
-                                                onChange={(e) =>
-                                                    setFormDataBudget({
-                                                        ...formDataBudget,
-                                                        start_date: e.target.value,
-                                                    })
-                                                }
-                                                className="w-full border p-2 rounded"
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label className="block mb-1 text-sm font-medium">
-                                                End Date
-                                            </label>
-                                            <input
-                                                type="date"
-                                                value={formDataBudget.end_date}
-                                                onChange={(e) =>
-                                                    setFormDataBudget({
-                                                        ...formDataBudget,
-                                                        end_date: e.target.value,
-                                                    })
-                                                }
-                                                className="w-full border p-2 rounded"
-                                            />
-                                        </div>
-
-                                        {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
-
-                                        <div className="flex justify-end gap-3 mt-4">
-                                        <button
-                                            type="button"
-                                            onClick={() => setOpenModalForNewBudget(false)}
-                                            className="px-4 py-2 border rounded hover:bg-gray-50 transition-colors"
-                                        >
-                                            Cancel
-                                        </button>
-                                        <button
-                                            onClick={handleSubmitNewBudget}
-                                            className="px-4 py-2 bg-pink-500 text-white rounded hover:bg-pink-600 transition-colors"
-                                        >
-                                            Create
-                                        </button>
-                                    </div>
-
-
-
-                                    </div>
-                                </div>
-                            )
-                        }
-
-                        <div className="flex flex-col sm:flex-row justify-end gap-3 mt-3">
-                            <button
-                            onClick={closeModal}
-                            className="px-3 py-1 border rounded cursor-pointer w-full sm:w-auto"
-                            >
-                            Cancel
-                            </button>
-                            <button
-                            onClick={handleSave}
-                            className="px-3 py-1 bg-pink-500 text-white rounded cursor-pointer w-full sm:w-auto"
-                            >
-                            Save
-                            </button>
-                        </div>
-                        </div>
-                        {loading && (
-                            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                                <LoadingIndicator />
-                            </div>
-                        )}
-
-                    </div>
-                    
+                    <ExpenseModal
+                        currentExpense={currentExpense}
+                        setCurrentExpense={setCurrentExpense}
+                        categories={categories}
+                        budgets={budgets}
+                        setBudgets={setBudgets}
+                        setCategories={setCategories}
+                        setExpenses={setExpenses}
+                        setShowModal={setShowModal}
+                        setOpenModalForNewBudget={setOpenModalForNewBudget}
+                        setOpenModalForNewCategory={() => setOpenModalForNewCategory(true)}
+                        amountError={amountError}
+                        setAmountError={setAmountError}
+                        loading={loading}
+                        setLoading={setLoading}
+                        handleSave={handleSave}
+                    />
                 )}
 
+                {openModalForNewCategory && (
+                    <CategoryModal
+                        onSave={addNewCategory}
+                        onClose={() => setOpenModalForNewCategory(false)}
+                    />
+                )}
+
+                {openModalForNewBudget && (
+                    <BudgetModal
+                        formDataBudget={formDataBudget}
+                        setFormDataBudget={setFormDataBudget}
+                        onSubmit={handleSubmitNewBudget}
+                        onClose={() => setOpenModalForNewBudget(false)}
+                        error={error}
+                    />
+                )}
 
                 {deleteTarget && (
-                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-3 sm:px-0">
-                        <div className="bg-white p-4 sm:p-6 rounded-lg w-full max-w-[90%] sm:w-[350px]">
-                        <h2 className="text-lg font-semibold mb-4 text-center">
-                            Delete this expense?
-                        </h2>
-                        <p className="text-gray-600 text-center mb-4 break-words">
-                            “{deleteTarget.name}” will be permanently removed.
-                        </p>
-                        <div className="flex flex-col sm:flex-row justify-end gap-3 mt-8">
-                            <button
-                            onClick={() => setDeleteTarget(null)}
-                            className="px-3 py-1 border rounded cursor-pointer w-full sm:w-auto"
-                            >
-                            Cancel
-                            </button>
-                            <button
-                            onClick={confirmDelete}
-                            className="px-3 py-1 bg-red-500 text-white rounded cursor-pointer w-full sm:w-auto"
-                            >
-                            Delete
-                            </button>
-                        </div>
-                        </div>
+                    <DeleteExpenseModal
+                        deleteTarget={deleteTarget}
+                        onCancel={() => setDeleteTarget(null)}
+                        onConfirm={confirmDelete}
+                    />
+                )}
+
+                {loading && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                        <LoadingIndicator />
                     </div>
                 )}
             </div>
         </section>
-    )
-}
+    );
+};
 
-export default Expenses
+export default Expenses;
