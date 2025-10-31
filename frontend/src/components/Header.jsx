@@ -6,8 +6,16 @@ import { useFetch } from '../hooks';
 const Header = () => {
     const { data, loading, error } = useFetch('api/profile/');
 
-    if (loading) return <p>Loading...</p>;
-    if (error) return <p>Failed to load profile</p>;
+    if (loading){
+        return (
+            <LoadingIndicator />
+        )
+    };
+    if (error){
+        return (
+            <LoadingIndicator />
+        )
+    };
 
     if(!data) return null
 

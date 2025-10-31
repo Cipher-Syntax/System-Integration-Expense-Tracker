@@ -52,8 +52,16 @@ const Dashboard = () => {
         }
     }, [expensesData, selectedBudget])
 
-    if (loading) return <p className='text-[12px]'>Loading...</p>
-    if (error) return <p className='text-[12px]'>Something went wrong. Please try again</p>
+    if (loading){
+        return (
+            <LoadingIndicator />
+        )
+    };
+    if (error){
+        return (
+            <LoadingIndicator />
+        )
+    };
     if (!data) return null
 
     const progressPercent = expenseTracker

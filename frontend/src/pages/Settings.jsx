@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useFetch } from "../hooks";
 
 import { ProfileCard, EditProfileModal, NotificationPreferences, DeleteAccountModal, SaveSuccessToast } from '../components/settings'
+import { LoadingIndicator } from "../components";
 
 const Settings = () => {
     const { data, loading, error } = useFetch("api/profile");
@@ -75,8 +76,16 @@ const Settings = () => {
         setTimeout(() => setMessage(false), 2000);
     };
 
-    if (loading) return <p>Loading...</p>;
-    if (error) return <p>Failed to load profile</p>;
+    if (loading){
+        return (
+            <LoadingIndicator />
+        )
+    };
+    if (error){
+        return (
+            <LoadingIndicator />
+        )
+    };
 
     return (
         <section className="mt-26 w-full mx-auto px-4">
