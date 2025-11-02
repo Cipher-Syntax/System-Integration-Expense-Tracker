@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useFetch } from '../hooks';
 import { BalanceCard, TotalsCard, ProgressBar, ExpenseChart, RecentExpenses, MonthlyExpenses } from '../components/dashboard'
+import { LoadingIndicator } from '../components';
 
 const Dashboard = () => {
     const [availableBalance, setAvailableBalance] = useState(null)

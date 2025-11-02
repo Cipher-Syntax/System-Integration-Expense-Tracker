@@ -8,7 +8,7 @@ import { ProfileCard, EditProfileModal, NotificationPreferences, DeleteAccountMo
 import { LoadingIndicator } from "../components";
 
 const Settings = () => {
-    const { data, loading, error } = useFetch("api/profile");
+    const { data, loading, error } = useFetch("api/profile/");
     const [userData, setUserData] = useState({});
     const [username, setUsername] = useState("");
     const [phoneNumber, setPhoneNumber] = useState("");

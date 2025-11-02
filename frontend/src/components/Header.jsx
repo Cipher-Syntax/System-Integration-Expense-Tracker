@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import api from '../api/api';
 import { Link } from 'react-router-dom';
 import { useFetch } from '../hooks';
+import { LoadingIndicator } from "../components"
 
 const Header = () => {
     const { data, loading, error } = useFetch('api/profile/');
