@@ -2,7 +2,7 @@ import React from "react";
 
 const TotalsCard = ({ totalExpenses, budget }) => {
     return (
-        <div className="flex flex-col sm:flex-row w-full sm:w-[350px] items-center justify-between mt-5 gap-5">
+        <div className="flex flex-row sm:flex-row w-full sm:w-[350px] items-center justify-between mt-5 gap-5">
             <div className="text-center w-full sm:w-[160px]">
                 <h2 className="text-gray-500 text-sm">Total Expenses</h2>
                 <h3 className="text-sm mt-2 font-bold text-[#d70909]">

@@ -76,16 +76,16 @@ const Settings = () => {
         setTimeout(() => setMessage(false), 2000);
     };
 
-    if (loading){
-        return (
-            <LoadingIndicator />
-        )
-    };
-    if (error){
-        return (
-            <LoadingIndicator />
-        )
-    };
+    // if (loading){
+    //     return (
+    //         <LoadingIndicator />
+    //     )
+    // };
+    // if (error){
+    //     return (
+    //         <LoadingIndicator />
+    //     )
+    // };
 
     return (
         <section className="mt-26 w-full mx-auto px-4">
