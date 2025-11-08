@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Wallet, TrendingUp, PieChart, ArrowRight, Eye, EyeOff } from "lucide-react";
+import { Wallet, TrendingUp, PieChart, ArrowRight, Eye, EyeOff, Globe  } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { LoadingIndicator } from "../components";
 import { useForm } from 'react-hook-form'
@@ -37,7 +37,6 @@ const Form = ({ route, method }) => {
         }
         try{
             const response = await api.post(route, data, {withCredentials: true});
-            console.log(response.data)
             if(method === "login"){
                 if(remembered){
                     localStorage.setItem("rememberedUsername", data.username);
@@ -66,6 +65,9 @@ const Form = ({ route, method }) => {
                 else if(error.response.status === 400){
                     if(error.response.data.username){
                         setError(error.response.data.username[0])
+                    }
+                    else if(error.response.data.email){
+                        setError(error.response.data.email[0])
                     }
                     else{
                         setError('Something went wrong')
@@ -129,7 +131,7 @@ const Form = ({ route, method }) => {
                     </div>
 
                     <div className="w-full">
-                        <form onSubmit={handleSubmit(onSubmit)} className={`bg-white/80 backdrop-blur-xl rounded-2xl shadow-2xl p-5 border border-white/20 h-[650px] ${method === "register" ? "sm:h-[600px]" : "sm:h-[500px]"}`}>
+                        <form onSubmit={handleSubmit(onSubmit)} className={`bg-white/80 backdrop-blur-xl rounded-2xl shadow-2xl p-5 border border-white/20 h-[650px] ${method === "register" ? "sm:h-[600px]" : "sm:h-[560px]"}`}>
                             <div className="md:hidden mb-4 text-center mt-5">
                                 <div className="flex items-center justify-center gap-2 mb-2">
                                     <div className="p-1.5 bg-gradient-to-br from-pink-500 to-pink-600 rounded-lg">
@@ -243,8 +245,6 @@ const Form = ({ route, method }) => {
                                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                     </button>
                                 </div>
-                                {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
-
                                     {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
                                 </div>
 
@@ -273,10 +273,6 @@ const Form = ({ route, method }) => {
                                                     {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                                 </button>
                                             </div>
-                                            {errors.confirm_password && (
-                                                <p className="text-red-500 text-sm">{errors.confirm_password.message}</p>
-                                            )}
-
                                             {errors.confirm_password && (
                                                 <p className="text-red-500 text-sm">{errors.confirm_password.message}</p>
                                             )}
@@ -314,11 +310,6 @@ const Form = ({ route, method }) => {
                                 >
                                     {
                                         isSubmitting ? "Processing..." : status
-                                        // method === "login" ? (
-                                        //     <p>Sign In</p>
-                                        // ): (
-                                        //     <p>Sign Up</p>
-                                        // )
                                     }
                                     <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
                                 </button>
@@ -347,12 +338,33 @@ const Form = ({ route, method }) => {
                                     </div>
                                 )
                             }
+                            {
+                                method === "login" && (
+                                    <>
+                                        <div className="flex items-center my-3">
+                                            <div className="flex-grow border-t border-gray-300"></div>
+                                            <span className="px-3 text-gray-400 text-xs font-medium">or</span>
+                                            <div className="flex-grow border-t border-gray-300"></div>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => console.log("Google login clicked")}
+                                            className="w-full flex items-center justify-center gap-2 border border-gray-300 rounded-lg py-3 bg-white hover:bg-gray-50 transition-all duration-300 text-gray-700 text-xs font-semibold cursor-pointer"
+                                        >
+                                            <Globe className="text-lg" />
+                                            Continue with Google
+                                        </button>
+                                    </>
+                                )
+                            }
 
                             {
                                 method === "register" ? "" : <p className="text-center text-xs text-gray-400 mt-2">
                                     By signing in, you agree to our Terms & Privacy Policy
                                 </p>
                             }
+
+
                         </form>
                     </div>
                 </div>

@@ -93,6 +93,7 @@ class CookieTokenObtainPairView(TokenObtainPairView):
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
         data = response.data
+        print(data)
         access_token = data.get('access')
         refresh_token = data.get('refresh')
         

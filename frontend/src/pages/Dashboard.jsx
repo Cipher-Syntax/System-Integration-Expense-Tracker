@@ -53,16 +53,16 @@ const Dashboard = () => {
         }
     }, [expensesData, selectedBudget])
 
-    if (loading){
-        return (
-            <LoadingIndicator />
-        )
-    };
-    if (error){
-        return (
-            <LoadingIndicator />
-        )
-    };
+    // if (loading){
+    //     return (
+    //         <LoadingIndicator />
+    //     )
+    // };
+    // if (error){
+    //     return (
+    //         <LoadingIndicator />
+    //     )
+    // };
     if (!data) return null
 
     const progressPercent = expenseTracker

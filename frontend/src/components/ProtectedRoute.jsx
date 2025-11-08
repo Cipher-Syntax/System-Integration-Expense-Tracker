@@ -7,7 +7,7 @@ const ProtectedRoute = ({ children }) => {
 
     const checkAuth = async () => {
         try {
-            await api.post('/api/token/refresh/');
+            await api.post('api/token/refresh/');
             setIsAuthorized(true);
             return true;
         } catch (error) {
