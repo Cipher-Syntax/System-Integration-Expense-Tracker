@@ -76,9 +76,9 @@ const Dashboard = () => {
 
             <div className="flex flex-col lg:flex-row justify-center lg:justify-between items-center lg:items-start gap-10 mt-10 w-full">
                 <div className="flex flex-col items-center lg:items-start w-full">
-                <BalanceCard availableBalance={availableBalance} />
-                <TotalsCard totalExpenses={totalExpenses} budget={budget} />
-                <ProgressBar progressPercent={progressPercent} />
+                    <BalanceCard availableBalance={availableBalance} />
+                    <TotalsCard totalExpenses={totalExpenses} budget={budget} />
+                    <ProgressBar progressPercent={progressPercent} />
                 </div>
 
                 <ExpenseChart chartData={chartData} filter={filter} setFilter={setFilter} />
