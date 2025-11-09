@@ -4,37 +4,28 @@ import { Layout, Dashboard, Login, Register, NotFound, ForgotPassword, Expenses,
 import { ProtectedRoute } from './components';
 
 const App = () => {
-    const Logout = () => {
-        return <Navigate to="/login"></Navigate>
-    }
+    const Logout = () => <Navigate to="/login" />;
 
     return (
-        <>
-            <BrowserRouter>
-                <Routes>
-                    <Route path='/login' element={<Login></Login>}></Route>
-                    <Route path='/register' element={<Register></Register>}></Route>
-                    <Route path='/logout' element={<Logout></Logout>}></Route>
-                    <Route path='*' element={<NotFound></NotFound>}></Route>
-                    <Route path='/forgot-password' element={<ForgotPassword></ForgotPassword>}></Route>
-                    <Route path='api/reset-password/:uid/:token' element={<PasswordResetConfirm></PasswordResetConfirm>}></Route>
+        <BrowserRouter>
+            <Routes>
+                <Route path='/login' element={<Login />} />
+                <Route path='/register' element={<Register />} />
+                <Route path='/logout' element={<Logout />} />
+                <Route path='/forgot-password' element={<ForgotPassword />} />
+                <Route path='api/reset-password/:uid/:token' element={<PasswordResetConfirm />} />
+                <Route path='*' element={<NotFound />} />
 
-                    <Route element={<Layout></Layout>}>
-                        <Route path='/' element={
-                            <ProtectedRoute>
-                                <Dashboard></Dashboard>
-                            </ProtectedRoute>
-                        }>
-                        </Route>
-                        <Route path='/expenses' element={<Expenses></Expenses>}></Route>
-                        <Route path='/budgets' element={<Budgets></Budgets>}></Route>
-                        <Route path='/reports' element={<Reports></Reports>}></Route>
-                        <Route path='/settings' element={<Settings></Settings>}></Route>
-                    </Route>
-                </Routes>
-            </BrowserRouter>
-        </>
+                <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+                    <Route path='/' element={<Dashboard />} />
+                    <Route path='/expenses' element={<Expenses />} />
+                    <Route path='/budgets' element={<Budgets />} />
+                    <Route path='/reports' element={<Reports />} />
+                    <Route path='/settings' element={<Settings />} />
+                </Route>
+            </Routes>
+        </BrowserRouter>
     )
 }
 
-export default App
+export default App;
