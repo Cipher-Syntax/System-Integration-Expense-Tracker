@@ -6,18 +6,6 @@ import { LoadingIndicator } from "../components"
 
 const Header = () => {
     const { data, loading, error } = useFetch('api/profile/');
-
-    if (loading){
-        return (
-            <LoadingIndicator />
-        )
-    };
-    if (error){
-        return (
-            <LoadingIndicator />
-        )
-    };
-
     if(!data) return null
 
     return (

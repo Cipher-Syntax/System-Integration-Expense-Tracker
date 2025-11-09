@@ -1,26 +1,27 @@
 import React, { useEffect, useState } from "react";
-import { Wallet, TrendingUp, PieChart, ArrowRight, Eye, EyeOff, Globe  } from "lucide-react";
+import { Wallet, TrendingUp, PieChart, ArrowRight, Eye, EyeOff, Globe } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { LoadingIndicator } from "../components";
-import { useForm } from 'react-hook-form'
+import { useForm } from "react-hook-form";
+import { GoogleLogin } from "@react-oauth/google";
 import api from "../api/api";
 
 const Form = ({ route, method }) => {
-    const { register, handleSubmit, formState: { errors, isSubmitting }, setValue } = useForm();
+    const { register, handleSubmit, formState: { errors, isSubmitting }, setValue, watch } = useForm();
     const [error, setError] = useState("");
     const [remembered, setRemembered] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
     const navigate = useNavigate();
 
-    const status = method == "login" ? "Login" : "Register";
+    const passwordValue = watch("password", "");
+    const status = method === "login" ? "Login" : "Register";
+
     useEffect(() => {
-        if(error){
-            const timer = setTimeout(() => setError(""), 2000)
-            return () => clearTimeout(timer)
+        if (error) {
+            const timer = setTimeout(() => setError(""), 2000);
+            return () => clearTimeout(timer);
         }
-    }, [error])
+    }, [error]);
 
     useEffect(() => {
         const savedUsername = localStorage.getItem("rememberedUsername");
@@ -28,57 +29,65 @@ const Form = ({ route, method }) => {
             setRemembered(true);
             setValue("username", savedUsername);
         }
-    }, []);
-
+    }, [setValue]);
 
     const onSubmit = async (data) => {
         if (data.phone_number) {
             data.phone_number = data.phone_number.replace(/\s+/g, "");
         }
-        try{
-            const response = await api.post(route, data, {withCredentials: true});
-            if(method === "login"){
-                if(remembered){
-                    localStorage.setItem("rememberedUsername", data.username);
-                } else {
+
+        try {
+            const response = await api.post(route, data, { withCredentials: true });
+
+            if (method === "login") {
+                if (remembered) {
+                    localStorage.setItem("rememberedUsername", data.username)
+                }
+                else {
                     localStorage.removeItem("rememberedUsername");
                 }
-                localStorage.setItem('user', data.username);
-                navigate('/');
-            }
-            else{
+
+                localStorage.setItem("user", data.username);
+                navigate("/");
+            } else {
                 navigate("/login");
             }
         }
-        catch(error){
-            if(error.response){
-                if(error.response.status === 401){
-                    const errorDetail = error.response.data.detail
-
-                    if(errorDetail === "No active account found with the given credentials"){
-                        setError('Invalid username or password')
-                    }
-                    else{
-                        console.log(errorDetail)
-                    }
-                }
-                else if(error.response.status === 400){
-                    if(error.response.data.username){
-                        setError(error.response.data.username[0])
-                    }
-                    else if(error.response.data.email){
-                        setError(error.response.data.email[0])
-                    }
-                    else{
-                        setError('Something went wrong')
-                    }
-                }
-                else{
-                    setError('Network error. Please try again')
-                }
+        catch (err) {
+            if (err.response) {
+                if (err.response.status === 401) {
+                    const detail = err.response.data.detail;
+                    if (detail === "No active account found with the given credentials") {
+                        setError("Invalid username or password");
+                    } else console.log(detail);
+                } else if (err.response.status === 400) {
+                    setError(err.response.data.username?.[0] || err.response.data.email?.[0] || "Something went wrong");
+                } else setError("Network error. Please try again");
             }
         }
-    }
+    };
+
+    const handleGoogleLogin = async (credentialResponse) => {
+        if (!credentialResponse?.credential) {
+            setError("Google login was cancelled.");
+            return;
+        }
+
+        try {
+            const res = await api.post("api/auth/google/",
+                { token: credentialResponse.credential },
+                { withCredentials: true }
+            );
+
+            localStorage.setItem("access_token", res.data.access);
+            localStorage.setItem("refresh_token", res.data.refresh);
+            localStorage.setItem("user", res.data.user || "");
+            navigate("/");
+        } catch (err) {
+            console.error("Google login failed", err);
+            setError("Google login failed. Try again.");
+        }
+    };
 
     const features = [
         { icon: <Wallet className="w-6 h-6" />, title: "Smart Tracking", desc: "Monitor every expense" },
@@ -88,11 +97,14 @@ const Form = ({ route, method }) => {
 
     return (
         <div className="h-screen bg-gradient-to-br from-pink-50 via-white to-pink-50 overflow-hidden">
+            {/* Background blobs */}
             <div className="absolute top-0 right-0 w-80 h-80 bg-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
             <div className="absolute bottom-0 left-0 w-80 h-80 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
             <div className="absolute top-5 w-80 h-80 bg-pink-100 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
+
             <div className="relative flex items-center justify-center h-full px-4">
                 <div className="grid md:grid-cols-2 gap-6 max-w-4xl w-full items-center">
+                    {/* Left panel */}
                     <div className="hidden md:flex flex-col space-y-4">
                         <div className="space-y-4">
                             <div className="flex items-center gap-2">
@@ -103,10 +115,9 @@ const Form = ({ route, method }) => {
                             </div>
                             <p className="text-sm text-gray-600">Master your money with intelligent expense tracking</p>
                         </div>
-
                         <div className="space-y-1">
-                            {features.map((feature, index) => (
-                                <div key={index} className="flex gap-5 group cursor-pointer mt-3 items-center">
+                            {features.map((feature, idx) => (
+                                <div key={idx} className="flex gap-5 group cursor-pointer mt-3 items-center">
                                     <div className="p-3 bg-pink-100 rounded-md text-pink-600 group-hover:bg-pink-500 group-hover:text-white transition-all duration-300">
                                         <div className="w-5 h-5 flex items-center justify-center">{feature.icon}</div>
                                     </div>
@@ -117,254 +128,134 @@ const Form = ({ route, method }) => {
                                 </div>
                             ))}
                         </div>
-
-                        <div className="pt-2 space-y-1">
-                            <div className="flex items-center gap-2 text-xs text-gray-600">
-                                <div className="w-1 h-1 rounded-full bg-pink-500"></div>
-                                    Join thousands managing their finances
-                                </div>
-                            <div className="flex items-center gap-2 text-xs text-gray-600">
-                                <div className="w-1 h-1 rounded-full bg-pink-500"></div>
-                                Real-time tracking and insights
-                            </div>
-                        </div>
                     </div>
 
                     <div className="w-full">
                         <form onSubmit={handleSubmit(onSubmit)} className={`bg-white/80 backdrop-blur-xl rounded-2xl shadow-2xl p-5 border border-white/20 h-[650px] ${method === "register" ? "sm:h-[600px]" : "sm:h-[560px]"}`}>
-                            <div className="md:hidden mb-4 text-center mt-5">
-                                <div className="flex items-center justify-center gap-2 mb-2">
-                                    <div className="p-1.5 bg-gradient-to-br from-pink-500 to-pink-600 rounded-lg">
-                                        <Wallet className="w-5 h-5 text-white" />
-                                    </div>
-                                    <span className="text-3xl font-bold text-pink-600 leading-relaxed tracking-wider">SpendWise</span>
-                                </div>
-                                <p className="text-gray-600 text-xs">Take control of your spending</p>
-                            </div>
-
                             <h2 className="text-2xl font-bold text-gray-800 mb-0.5 text-center mt-10 leading-relaxed tracking-wider">{status}</h2>
                             <p className="text-center text-gray-500 text-xs mb-3">Sign in to your expense tracker</p>
 
-                            {
-                                error && (
-                                    <p className="text-red-500 text-sm text-center font-medium animate-fade-in">
-                                        {error}
-                                    </p>
-                                )
-                            }
-                            
+                            {error && <p className="text-red-500 text-sm text-center font-medium animate-fade-in">{error}</p>}
+
                             <div className="space-y-5 mt-7">
 
-                                {
-                                    method === "register" && (
-                                        <div className="flex items-center justify-between gap-x-3">
-                                            <div className="w-full">
-                                                <label className="block text-xs font-semibold text-gray-700 mb-0.5">
-                                                    Username
-                                                </label>
-                                                <input
-                                                    id="username"
-                                                    type="text"
-                                                    placeholder="Username"
-                                                    {...register("username", { required: "Username is required" })}
-                                                    className="w-full px-3 py-3 bg-gray-50 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-pink-500 focus:bg-white transition-all duration-300 text-xs text-gray-800 placeholder-gray-400 placeholder:leading-relaxed placeholder:tracking-widest"
-                                                />
-                                                {errors.username && <p className="text-red-500 text-sm">{errors.username.message}</p>}
-                                            </div>
-
-                                            <div className="w-full">
-                                                <label className="block text-xs font-semibold text-gray-700 mb-0.5">
-                                                    Phone Number
-                                                </label>
-                                                <input
-                                                    id="phone_number"
-                                                    type="text"
-                                                    placeholder="+63 912 345 6789"
-                                                    {...register("phone_number", { required: "Phone number is required" })}
-                                                    className="w-full px-3 py-3 bg-gray-50 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-pink-500 focus:bg-white transition-all duration-300 text-xs text-gray-800 placeholder-gray-400 placeholder:leading-relaxed placeholder:tracking-widest"
-                                                />
-                                                {errors.phone_number && <p className="text-red-500 text-sm">{errors.phone_number.message}</p>}
-                                            </div>
-                                        </div>
-                                    )
-                                }
-                                {
-                                    method === "login" ? (
+                                {method === "login" ? (
+                                    <div>
+                                        <label className="block text-xs font-semibold text-gray-700 mb-0.5">Username</label>
+                                        <input
+                                            type="text"
+                                            placeholder="Username"
+                                            {...register("username", { required: "Username is required" })}
+                                            className="w-full px-3 py-3 bg-gray-50 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-pink-500 focus:bg-white transition-all duration-300 text-xs text-gray-800 placeholder-gray-400"
+                                        />
+                                        {errors.username && <p className="text-red-500 text-sm">{errors.username.message}</p>}
+                                    </div>
+                                ) : (
+                                    <>
                                         <div>
-                                            <label className="block text-xs font-semibold text-gray-700 mb-0.5">
-                                                Username
-                                            </label>
+                                            <label className="block text-xs font-semibold text-gray-700 mb-0.5">Username</label>
                                             <input
-                                                id="username"
                                                 type="text"
                                                 placeholder="Username"
                                                 {...register("username", { required: "Username is required" })}
-                                                className="w-full px-3 py-3 bg-gray-50 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-pink-500 focus:bg-white transition-all duration-300 text-xs text-gray-800 placeholder-gray-400 placeholder:leading-relaxed placeholder:tracking-widest"
+                                                className="w-full px-3 py-3 bg-gray-50 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-pink-500 focus:bg-white transition-all duration-300 text-xs text-gray-800 placeholder-gray-400"
                                             />
                                             {errors.username && <p className="text-red-500 text-sm">{errors.username.message}</p>}
                                         </div>
-                                    ) : (
                                         <div>
-                                            <label className="block text-xs font-semibold text-gray-700 mb-0.5">
-                                                Email Address
-                                            </label>
+                                            <label className="block text-xs font-semibold text-gray-700 mb-0.5">Email Address</label>
                                             <input
-                                                id="email"
                                                 type="email"
                                                 placeholder="you@example.com"
                                                 {...register("email", { required: "Email is required" })}
-                                                className="w-full px-3 py-3 bg-gray-50 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-pink-500 focus:bg-white transition-all duration-300 text-xs text-gray-800 placeholder-gray-400 placeholder:leading-relaxed placeholder:tracking-widest"
+                                                className="w-full px-3 py-3 bg-gray-50 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-pink-500 focus:bg-white transition-all duration-300 text-xs text-gray-800 placeholder-gray-400"
                                             />
                                             {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
                                         </div>
-                                    )
-                                }
+                                    </>
+                                )}
 
                                 <div>
-                                    <div className="flex justify-between items-center mb-0.5">
-                                        <label className="block text-xs font-semibold text-gray-700">
-                                        Password
-                                        </label>
-
-                                    </div>
+                                    <label className="block text-xs font-semibold text-gray-700 mb-0.5">Password</label>
                                     <div className="relative">
-                                    <input
-                                        type={showPassword ? "text" : "password"}
-                                        placeholder="••••••••"
-                                        {...register("password", {
-                                            required: "Password is required",
-                                            minLength: { value: 8, message: "At least 8 characters" },
-                                        })}
-                                        className="w-full px-3 py-3 bg-gray-50 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-pink-500 focus:bg-white transition-all duration-300 text-xs text-gray-800 placeholder-gray-400 placeholder:leading-relaxed placeholder:tracking-widest"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-pink-600"
-                                    >
-                                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                    </button>
-                                </div>
+                                        <input
+                                            type={showPassword ? "text" : "password"}
+                                            placeholder="••••••••"
+                                            {...register("password", { required: "Password is required", minLength: { value: 8, message: "At least 8 characters" } })}
+                                            className="w-full px-3 py-3 bg-gray-50 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-pink-500 focus:bg-white transition-all duration-300 text-xs text-gray-800 placeholder-gray-400"
+                                        />
+                                        <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-pink-600">
+                                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                        </button>
+                                    </div>
                                     {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
                                 </div>
 
-                                {
-                                    method === "register" && (
-                                        <div>
-                                            <label className="block text-xs font-semibold text-gray-700 mb-0.5">
-                                                Confirm Password
-                                            </label>
-                                            <div className="relative">
-                                                <input
-                                                    type={showConfirmPassword ? "text" : "password"}
-                                                    placeholder="••••••••"
-                                                    {...register("confirm_password", {
-                                                        required: "Please confirm your password",
-                                                        validate: (value, { password }) =>
-                                                            value === password || "Passwords do not match",
-                                                    })}
-                                                    className="w-full px-3 py-3 bg-gray-50 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-pink-500 focus:bg-white transition-all duration-300 text-xs text-gray-800 placeholder-gray-400 placeholder:leading-relaxed placeholder:tracking-widest"
-                                                />
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                                    className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-pink-600"
-                                                >
-                                                    {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                                </button>
-                                            </div>
-                                            {errors.confirm_password && (
-                                                <p className="text-red-500 text-sm">{errors.confirm_password.message}</p>
-                                            )}
+                                {method === "register" && (
+                                    <div>
+                                        <label className="block text-xs font-semibold text-gray-700 mb-0.5">Confirm Password</label>
+                                        <div className="relative">
+                                            <input
+                                                type={showConfirmPassword ? "text" : "password"}
+                                                placeholder="••••••••"
+                                                {...register("confirm_password", {
+                                                    required: "Please confirm your password",
+                                                    validate: (value) => value === passwordValue || "Passwords do not match"
+                                                })}
+                                                className="w-full px-3 py-3 bg-gray-50 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-pink-500 focus:bg-white transition-all duration-300 text-xs text-gray-800 placeholder-gray-400"
+                                            />
+                                            <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-pink-600">
+                                                {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                            </button>
                                         </div>
-                                    )
-                                }
+                                        {errors.confirm_password && <p className="text-red-500 text-sm">{errors.confirm_password.message}</p>}
+                                    </div>
+                                )}
 
-
-                                {
-                                    method === "login" && (
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-2">
-                                                <input
-                                                    type="checkbox"
-                                                    id="remember"
-                                                    checked={remembered}
-                                                    onChange={(e) => setRemembered(e.target.checked)}
-                                                    className="w-3 h-3 rounded cursor-pointer accent-pink-500"
-                                                />
-                                                <label htmlFor="remember" className="text-xs text-gray-600 cursor-pointer">
-                                                    Keep me signed in
-                                                </label>
-                                            </div>
-                                            <Link to="/forgot-password" className="text-xs text-pink-500 hover:text-pink-600 font-medium">
-                                                Forgot?
-                                            </Link>
+                                {method === "login" && (
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <input type="checkbox" id="remember" checked={remembered} onChange={(e) => setRemembered(e.target.checked)} className="w-3 h-3 rounded cursor-pointer accent-pink-500" />
+                                            <label htmlFor="remember" className="text-xs text-gray-600 cursor-pointer">Keep me signed in</label>
                                         </div>
-                                    )
-                                }
+                                        <Link to="/forgot-password" className="text-xs text-pink-500 hover:text-pink-600 font-medium">Forgot?</Link>
+                                    </div>
+                                )}
 
-                                <button 
-                                    type="submit"
-                                    disabled={isSubmitting}
-                                    className={`w-full  text-white font-bold py-3 rounded-lg hover:shadow-lg hover:shadow-pink-500/30 transition-all duration-300 flex items-center justify-center gap-2 group text-xs cursor-pointer ${isSubmitting ? "bg-pink-400 cursor-not-allowed" : "bg-gradient-to-r from-pink-500 to-pink-600"}`}
-                                >
-                                    {
-                                        isSubmitting ? "Processing..." : status
-                                    }
+                                {/* Submit button */}
+                                <button type="submit" disabled={isSubmitting} className={`w-full text-white font-bold py-3 rounded-lg hover:shadow-lg hover:shadow-pink-500/30 transition-all duration-300 flex items-center justify-center gap-2 ${isSubmitting ? "bg-pink-400 cursor-not-allowed" : "bg-gradient-to-r from-pink-500 to-pink-600"}`}>
+                                    {isSubmitting ? "Processing..." : status}
                                     <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
                                 </button>
-                                {/* <LoadingIndicator></LoadingIndicator> */}
-                                
-                            </div>
 
-                            {
-                                method === "login" ? (
-                                    <div className="mt-3 pt-3 border-t border-gray-200">
-                                        <p className="text-center text-gray-600 text-xs">
-                                            New to SpendWise?{" "}
-                                            <Link to="/register" className="text-pink-600 font-bold hover:text-pink-700 transition-colors">
-                                                Create an account
-                                            </Link>
-                                        </p>
-                                    </div>
-                                ) : (
-                                    <div className="mt-3 pt-3 border-t border-gray-200">
-                                        <p className="text-center text-gray-600 text-xs">
-                                            Already have an account?{" "}
-                                            <Link to="/login" className="text-pink-600 font-bold hover:text-pink-700 transition-colors">
-                                                Login
-                                            </Link>
-                                        </p>
-                                    </div>
-                                )
-                            }
-                            {
-                                method === "login" && (
+                                {method === "login" && (
                                     <>
                                         <div className="flex items-center my-3">
                                             <div className="flex-grow border-t border-gray-300"></div>
                                             <span className="px-3 text-gray-400 text-xs font-medium">or</span>
                                             <div className="flex-grow border-t border-gray-300"></div>
                                         </div>
-                                        <button
-                                            type="button"
-                                            onClick={() => console.log("Google login clicked")}
-                                            className="w-full flex items-center justify-center gap-2 border border-gray-300 rounded-lg py-3 bg-white hover:bg-gray-50 transition-all duration-300 text-gray-700 text-xs font-semibold cursor-pointer"
-                                        >
-                                            <Globe className="text-lg" />
-                                            Continue with Google
-                                        </button>
+                                        <GoogleLogin
+                                            onSuccess={handleGoogleLogin}
+                                            onError={() => setError("Google login failed")}
+                                        />
                                     </>
-                                )
-                            }
+                                )}
+                            </div>
 
-                            {
-                                method === "register" ? "" : <p className="text-center text-xs text-gray-400 mt-2">
-                                    By signing in, you agree to our Terms & Privacy Policy
-                                </p>
-                            }
-
-
+                            <div className="text-center mt-4 text-xs text-gray-500">
+                                {method === "login" ? (
+                                    <p>
+                                        Don’t have an account?{' '}
+                                        <Link to="/register" className="text-pink-500 hover:text-pink-600 font-medium">Sign up</Link>
+                                    </p>
+                                ) : (
+                                    <p>
+                                        Already have an account?{' '}
+                                        <Link to="/login" className="text-pink-500 hover:text-pink-600 font-medium">Login</Link>
+                                    </p>
+                                )}
+                            </div>
                         </form>
                     </div>
                 </div>

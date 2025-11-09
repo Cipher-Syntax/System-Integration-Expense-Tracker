@@ -14,6 +14,10 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, Toke
 from rest_framework.exceptions import AuthenticationFailed #type: ignore
 from django.conf import settings
 from rest_framework.views import APIView #type: ignore
+from rest_framework.response import Response #type: ignore
+from rest_framework import status #type: ignore
+from rest_framework_simplejwt.tokens import RefreshToken #type: ignore
+from .utils import verify_google_token
 
 
 # Create your views here.
@@ -140,3 +144,21 @@ class CookieTokenRefreshView(TokenRefreshView):
         )
 
         return response
+
+
+
+class GoogleLoginAPIView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        token = request.data.get("token")
+        user = verify_google_token(token)
+        if not user:
+            return Response({"detail": "Invalid Google token"}, status=status.HTTP_400_BAD_REQUEST)
+
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            "refresh": str(refresh),
+            "access": str(refresh.access_token),
+            "user": user.username
+        }, status=status.HTTP_200_OK)

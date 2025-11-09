@@ -1,6 +1,6 @@
-from django.urls import path
+from django.urls import path, include
 # from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView #type: ignore
-from .views import CreateUserView, CurrentUserView, UpdateUserView, PasswordResetRequestView, PasswordResetConfirmView, CookieTokenObtainPairView, CookieTokenRefreshView
+from .views import CreateUserView, CurrentUserView, UpdateUserView, PasswordResetRequestView, PasswordResetConfirmView, CookieTokenObtainPairView, CookieTokenRefreshView, GoogleLoginAPIView
 
 
 urlpatterns = [
@@ -14,4 +14,9 @@ urlpatterns = [
     path('token/refresh/', CookieTokenRefreshView.as_view(), name='token-refresh'),
     path('password-reset/', PasswordResetRequestView.as_view(), name='password-reset-request'),
     path('reset-password/<uid>/<token>/', PasswordResetConfirmView.as_view(), name='password-reset-confirm'),
+    
+    path('auth/', include('dj_rest_auth.urls')),
+    path('auth/registration/', include('dj_rest_auth.registration.urls')),
+    path('accounts/', include('allauth.urls')),  # Google OAuth callback
+    path('auth/google/', GoogleLoginAPIView.as_view(), name='google-login')
 ]

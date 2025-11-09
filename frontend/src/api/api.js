@@ -5,6 +5,14 @@ const api = axios.create({
     withCredentials: true,
 });
 
+api.interceptors.request.use((config) => {
+    const token = localStorage.getItem('access_token');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+});
+
 let isRefreshing = false;
 
 api.interceptors.response.use(
@@ -17,7 +25,9 @@ api.interceptors.response.use(
             isRefreshing = true;
 
             try {
-                await api.post('/api/token/refresh/');
+                const refreshToken = localStorage.getItem('refresh_token');
+                const res = await api.post('/api/token/refresh/', { refresh: refreshToken });
+                localStorage.setItem('access_token', res.data.access);
                 isRefreshing = false;
                 return api(originalRequest);
             } catch (refreshError) {
