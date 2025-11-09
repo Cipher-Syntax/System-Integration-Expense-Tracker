@@ -59,7 +59,8 @@ class PasswordResetRequestView(generics.GenericAPIView):
         user = User.objects.get(email=email)
         token = default_token_generator.make_token(user)
         uid = urlsafe_base64_encode(force_bytes(user.pk))
-        reset_link = f"{settings.BACKEND_BASE_URL}/api/reset-password/{uid}/{token}/"
+        reset_link = f"{settings.FRONTEND_BASE_URL}/api/reset-password/{uid}/{token}/"
+        print('reset_link: ', reset_link)
 
         send_mail(
             subject="Reset Your Password",
@@ -144,7 +145,6 @@ class CookieTokenRefreshView(TokenRefreshView):
         )
 
         return response
-
 
 
 class GoogleLoginAPIView(APIView):
