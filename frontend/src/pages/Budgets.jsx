@@ -144,7 +144,7 @@ const Budgets = () => {
                     error={error}
                 />
             )}
-            
+
         </section>
     );
 };

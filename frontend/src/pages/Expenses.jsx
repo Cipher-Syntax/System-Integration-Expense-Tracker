@@ -243,8 +243,8 @@ const Expenses = () => {
 
         const dateMatch = date
             ? new Date(expense.date)
-                  .toLocaleString('default', { month: 'long' })
-                  .toLowerCase() === date.toLowerCase()
+                .toLocaleString('default', { month: 'long' })
+                .toLowerCase() === date.toLowerCase()
             : true;
 
         const checkAmountMatch = () => {

@@ -20,16 +20,16 @@ const Dashboard = () => {
 
     useEffect(() => {
         if (!loading && data?.length > 0) {
-        const active = data.find(b => b.status === 'active') || data[data.length - 1]
-        setSelectedBudget(active.id)
-        setExpenseTracker(active.limit_amount)
-        setBudget(active.limit_amount)
+            const active = data.find(b => b.status === 'active') || data[data.length - 1]
+            setSelectedBudget(active.id)
+            setExpenseTracker(active.limit_amount)
+            setBudget(active.limit_amount)
         }
     }, [data, loading])
 
     useEffect(() => {
         if (balanceAvailableData && selectedBudget) {
-        setAvailableBalance(Math.max(balanceAvailableData.remaining_balance, 0))
+            setAvailableBalance(Math.max(balanceAvailableData.remaining_balance, 0))
         }
     }, [balanceAvailableData, selectedBudget])
 
@@ -39,25 +39,25 @@ const Dashboard = () => {
 
     useEffect(() => {
         if (expensesData && selectedBudget) {
-        const filtered = expensesData.filter(exp => exp.budget === selectedBudget)
-        const dailyTotals = {}
-        filtered.forEach(exp => {
-            const date = exp.date
-            dailyTotals[date] = (dailyTotals[date] || 0) + parseFloat(exp.amount)
-        })
-        const formattedData = Object.entries(dailyTotals)
-            .map(([date, amount]) => ({ date, amount }))
-            .sort((a, b) => new Date(a.date) - new Date(b.date))
-        setChartData(formattedData)
-        setExpenses(filtered)
+            const filtered = expensesData.filter(exp => exp.budget === selectedBudget)
+            const dailyTotals = {}
+            filtered.forEach(exp => {
+                const date = exp.date
+                dailyTotals[date] = (dailyTotals[date] || 0) + parseFloat(exp.amount)
+            })
+            const formattedData = Object.entries(dailyTotals)
+                .map(([date, amount]) => ({ date, amount }))
+                .sort((a, b) => new Date(a.date) - new Date(b.date))
+            setChartData(formattedData)
+            setExpenses(filtered)
         }
     }, [expensesData, selectedBudget])
 
-    // if (loading){
-    //     return (
-    //         <LoadingIndicator />
-    //     )
-    // };
+    if (loading) {
+        return (
+            <LoadingIndicator />
+        )
+    };
     // if (error){
     //     return (
     //         <LoadingIndicator />
