@@ -96,11 +96,11 @@ const Form = ({ route, method }) => {
     ];
 
     return (
-        <div className="h-screen bg-gradient-to-br from-pink-50 via-white to-pink-50 overflow-hidden">
+        <div className="h-screen sm:bg-gradient-to-br from-pink-50 via-white to-pink-50 overflow-hidden">
             {/* Background blobs */}
-            <div className="absolute top-0 right-0 w-80 h-80 bg-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
-            <div className="absolute bottom-0 left-0 w-80 h-80 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
-            <div className="absolute top-5 w-80 h-80 bg-pink-100 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
+            <div className="absolute top-0 right-0 w-80 h-80 sm:bg-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
+            <div className="absolute bottom-0 left-0 w-80 h-80 sm:bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
+            <div className="absolute top-5 w-80 h-80 sm:bg-pink-100 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
 
             <div className="relative flex items-center justify-center h-full px-4">
                 <div className="grid md:grid-cols-2 gap-6 max-w-4xl w-full items-center">
@@ -131,7 +131,7 @@ const Form = ({ route, method }) => {
                     </div>
 
                     <div className="w-full">
-                        <form onSubmit={handleSubmit(onSubmit)} className={`bg-white/80 backdrop-blur-xl rounded-2xl shadow-2xl p-5 border border-white/20 h-[650px] ${method === "register" ? "sm:h-[600px]" : "sm:h-[560px]"}`}>
+                        <form onSubmit={handleSubmit(onSubmit)} className={`sm:bg-white/80 backdrop-blur-xl rounded-2xl sm:shadow-2xl p-5 sm:border sm:border-white/20 h-[650px] ${method === "register" ? "sm:h-[660px]" : "sm:h-[560px]"}`}>
                             <h2 className="text-2xl font-bold text-gray-800 mb-0.5 text-center mt-10 leading-relaxed tracking-wider">{status}</h2>
                             <p className="text-center text-gray-500 text-xs mb-3">Sign in to your expense tracker</p>
 
