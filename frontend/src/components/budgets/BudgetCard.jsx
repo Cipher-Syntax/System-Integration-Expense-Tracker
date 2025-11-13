@@ -10,40 +10,36 @@ const BudgetCard = ({ budget, handleDelete, openEditModal, activeBudget, progres
 
     return (
         <div
-            className={`rounded-xl shadow-md overflow-hidden transition-shadow duration-300 border-2 ${
-                isExpired || isFull
-                    ? "bg-gray-100 border-gray-300 opacity-70 cursor-not-allowed"
-                    : isActive
+            className={`rounded-xl shadow-md overflow-hidden transition-shadow duration-300 border-2 ${isExpired || isFull
+                ? "bg-gray-100 border-gray-300 opacity-70 cursor-not-allowed"
+                : isActive
                     ? "bg-white border-pink-500 hover:shadow-xl"
                     : "bg-white border-gray-200 hover:shadow-xl"
-            }`}
+                }`}
         >
             <div
-                className={`p-4 flex justify-between items-center ${
-                    isExpired || isFull
-                        ? "bg-gray-200"
-                        : "bg-gradient-to-r from-pink-50 to-purple-50"
-                }`}
+                className={`p-4 flex justify-between items-center ${isExpired || isFull
+                    ? "bg-gray-200"
+                    : "bg-gradient-to-r from-pink-50 to-purple-50"
+                    }`}
             >
                 <span
-                    className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                        isExpired || isFull
-                            ? "bg-gray-300 text-gray-600"
-                            : isActive
+                    className={`px-3 py-1 rounded-full text-xs font-semibold ${isExpired || isFull
+                        ? "bg-gray-300 text-gray-600"
+                        : isActive
                             ? "bg-green-100 text-green-700"
                             : "bg-gray-100 text-gray-600"
-                    }`}
+                        }`}
                 >
                     {status}
                 </span>
 
                 <div className="flex gap-3">
                     <Edit2
-                        className={`w-5 h-5 ${
-                            isExpired || isFull
-                                ? "text-gray-400 cursor-not-allowed"
-                                : "text-blue-500 cursor-pointer hover:text-blue-700 transition-colors"
-                        }`}
+                        className={`w-5 h-5 ${isExpired || isFull
+                            ? "text-gray-400 cursor-not-allowed"
+                            : "text-blue-500 cursor-pointer hover:text-blue-700 transition-colors"
+                            }`}
                         onClick={() => !isExpired && !isFull && openEditModal(budget)}
                     />
                     <Trash2
@@ -59,7 +55,7 @@ const BudgetCard = ({ budget, handleDelete, openEditModal, activeBudget, progres
                         Limit Amount
                     </p>
                     <p className={`text-3xl font-bold ${isExpired || isFull ? "text-gray-400" : "text-pink-600"}`}>
-                        ₱{parseFloat(budget.limit_amount).toLocaleString()}
+                        ₱ {parseFloat(budget.limit_amount).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </p>
                 </div>
 
@@ -97,15 +93,14 @@ const BudgetCard = ({ budget, handleDelete, openEditModal, activeBudget, progres
                     </h2>
                     <div className="w-full rounded-full h-3 overflow-hidden border border-gray-300 relative">
                         <div
-                            className={`h-full rounded-full transition-all duration-700 ease-in-out ${
-                                isExpired || isFull
-                                    ? "bg-gray-400"
-                                    : currentProgress < 70
+                            className={`h-full rounded-full transition-all duration-700 ease-in-out ${isExpired || isFull
+                                ? "bg-gray-400"
+                                : currentProgress < 70
                                     ? "bg-green-500"
                                     : currentProgress < 90
-                                    ? "bg-yellow-500"
-                                    : "bg-red-500"
-                            }`}
+                                        ? "bg-yellow-500"
+                                        : "bg-red-500"
+                                }`}
                             style={{ width: `${currentProgress}%` }}
                         ></div>
                     </div>
