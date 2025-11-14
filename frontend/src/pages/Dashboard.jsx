@@ -72,7 +72,7 @@ const Dashboard = () => {
 
     return (
         <section className="mt-26 w-full px-4 sm:px-6 md:px-10">
-            <h1 className="text-3xl font-bold leading-relaxed tracking-widest text-left">DASHBOARD</h1>
+            <h1 className="text-3xl font-bold leading-relaxed tracking-widest text-left">Dashboard</h1>
 
             <div className="flex flex-col lg:flex-row justify-center lg:justify-between items-center lg:items-start gap-10 mt-10 w-full">
                 <div className="flex flex-col items-center lg:items-start w-full">

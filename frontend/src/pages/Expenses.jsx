@@ -4,7 +4,7 @@ import { useSearchParams } from 'react-router-dom';
 import api from '../api/api';
 import { LoadingIndicator } from '../components';
 import { useFetch } from '../hooks';
-import { ExpenseFilters, ExpenseList, PaginationControls, ExpenseModal, CategoryModal, BudgetModal, DeleteExpenseModal } from '../components/expenses'
+import { ExpenseFilters, ExpenseList, PaginationControls, ExpenseModal, CategoryModal, BudgetModal, DeleteExpenseModal } from '../components/expenses';
 import { encryptId } from '../utils/CryptoUtils';
 
 const Expenses = () => {
@@ -57,9 +57,12 @@ const Expenses = () => {
     }, [expensesData]);
 
     useEffect(() => {
-        if (budgetData) setBudgets(budgetData);
+        if (budgetData) {
+            // Only include active budgets
+            const activeBudgets = budgetData.filter(b => b.status === "active");
+            setBudgets(activeBudgets);
+        }
     }, [budgetData]);
-
 
     const handleSubmitNewBudget = async (e) => {
         e.preventDefault();
@@ -100,7 +103,6 @@ const Expenses = () => {
         }
     };
 
-
     const handleSave = async () => {
         try {
             setAmountError('');
@@ -119,21 +121,6 @@ const Expenses = () => {
                     return;
                 }
 
-                if (currentExpense.date) {
-                    const expenseDate = new Date(currentExpense.date);
-                    const startDate = new Date(selectedBudget.start_date);
-                    const endDate = new Date(selectedBudget.end_date);
-
-                    if (expenseDate < startDate || expenseDate > endDate) {
-                        setAmountError(
-                            `Expense date must fall between ${selectedBudget.start_date} and ${selectedBudget.end_date}.`
-                        );
-                        setShowModal(true);
-                        setLoading(false);
-                        return;
-                    }
-                }
-
                 const budgetExpenses = expenses.filter(
                     (exp) =>
                         exp.budget === selectedBudget.id ||
@@ -146,16 +133,7 @@ const Expenses = () => {
                 );
 
                 const newTotal = currentTotal + parseFloat(currentExpense.amount);
-
-                if (newTotal > parseFloat(selectedBudget.limit_amount)) {
-                    setAmountError(
-                        `Adding this expense will exceed your budget limit of ₱${selectedBudget.limit_amount.toLocaleString()}.`
-                    );
-                    setLoading(false);
-                    return;
-                }
             }
-
 
             const formattedDate = currentExpense.date
                 ? new Date(currentExpense.date).toISOString().split('T')[0]
@@ -191,15 +169,12 @@ const Expenses = () => {
                 budget: ''
             });
 
-            setTimeout(() => {
-                setLoading(false);
-            }, 3000);
+            setTimeout(() => setLoading(false), 3000);
         } catch (err) {
             console.error('Failed to save expense:', err);
             setLoading(false);
         }
     };
-
 
     const addNewCategory = async (name) => {
         try {
@@ -221,7 +196,6 @@ const Expenses = () => {
         setShowModal(false);
     };
 
-
     useEffect(() => {
         const editId = searchParams.get('edit');
         if (editId && expenses.length > 0) {
@@ -233,7 +207,14 @@ const Expenses = () => {
         }
     }, [searchParams, expenses, setSearchParams]);
 
+    // --- Filter expenses by active budgets AND search filters ---
+    const activeBudgetIds = budgets.map(b => b.id);
+
     const filteredExpenses = expenses.filter((expense) => {
+        if (!expense.budget || !activeBudgetIds.includes(expense.budget?.id || expense.budget)) {
+            return false; // Skip expenses not tied to active budgets
+        }
+
         const searchMatch =
             expense.name.toLowerCase().includes(q.toLowerCase()) ||
             expense.description?.toLowerCase().includes(q.toLowerCase()) ||
@@ -260,6 +241,7 @@ const Expenses = () => {
         };
 
         const amountMatch = checkAmountMatch();
+
         return searchMatch && categoryMatch && dateMatch && amountMatch;
     });
 

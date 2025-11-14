@@ -1,9 +1,9 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter #type: ignore
-from .views import ExpenseviewSet, CategoryViewSet
+from .views import ExpenseViewSet, CategoryViewSet
 
 router = DefaultRouter()
-router.register(r'expenses', ExpenseviewSet)
+router.register(r'expenses', ExpenseViewSet)
 router.register(r'categories', CategoryViewSet)
 
 urlpatterns = [
