@@ -2,9 +2,10 @@ import axios from 'axios';
 
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL,
-    withCredentials: true,
+    withCredentials: true, // important: sends cookies automatically
 });
 
+// Add access token to headers if available
 api.interceptors.request.use((config) => {
     const token = localStorage.getItem('access_token');
     if (token) {
@@ -14,26 +15,52 @@ api.interceptors.request.use((config) => {
 });
 
 let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+    failedQueue.forEach(prom => {
+        if (error) prom.reject(error);
+        else prom.resolve(token);
+    });
+    failedQueue = [];
+};
 
 api.interceptors.response.use(
     response => response,
     async (error) => {
         const originalRequest = error.config;
 
-        if (error.response?.status === 401 && !originalRequest._retry && !isRefreshing) {
+        if (error.response?.status === 401 && !originalRequest._retry) {
+            if (isRefreshing) {
+                // Queue requests while refreshing
+                return new Promise((resolve, reject) => {
+                    failedQueue.push({ resolve, reject });
+                }).then(token => {
+                    originalRequest.headers.Authorization = `Bearer ${token}`;
+                    return api(originalRequest);
+                }).catch(err => Promise.reject(err));
+            }
+
             originalRequest._retry = true;
             isRefreshing = true;
 
             try {
-                const refreshToken = localStorage.getItem('refresh_token');
-                const res = await api.post('/api/token/refresh/', { refresh: refreshToken });
-                localStorage.setItem('access_token', res.data.access);
-                isRefreshing = false;
+                // **Use cookies** for refresh token
+                const res = await api.post('/api/token/refresh/', null, { withCredentials: true });
+                const newAccessToken = res.data.access;
+                localStorage.setItem('access_token', newAccessToken);
+
+                originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+                processQueue(null, newAccessToken);
                 return api(originalRequest);
-            } catch (refreshError) {
+            } catch (err) {
+                processQueue(err, null);
+                // Clear tokens if refresh fails
+                localStorage.removeItem('access_token');
+                console.error('Token refresh failed:', err);
+                return Promise.reject(err);
+            } finally {
                 isRefreshing = false;
-                console.error('Token refresh failed:', refreshError);
-                return Promise.reject(refreshError);
             }
         }
 
