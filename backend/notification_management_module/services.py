@@ -37,7 +37,7 @@ def get_ai_budget_recommendation(budget_limit, total_spent):
     """
     prompt = (
         f"The user's budget is ₱{budget_limit} and they have spent ₱{total_spent}. "
-        "Give a friendly, simple recommendation on how they can manage their spending better."
+        "Give a friendly, short around 3 senteces only and simple recommendation on how they can manage their spending better."
     )
 
     try:

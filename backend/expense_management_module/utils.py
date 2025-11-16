@@ -10,39 +10,38 @@ from notification_management_module.utils import send_email_notification, send_s
 # BUDGET ALERT FUNCTION
 # ------------------------------
 def check_budget_limit(user, budget):
-    """Checks budget threshold and sends alerts if exceeded."""
     total_expenses = Expense.objects.filter(
         budget=budget
     ).aggregate(total=models.Sum('amount'))['total'] or Decimal('0.00')
 
     limit = budget.limit_amount
-    threshold = Decimal('0.96') * limit  # 96% threshold
+    threshold = Decimal('0.96') * limit
+    message = f"Alert - You have reached 96% of your budget ({total_expenses} of {limit})"
+    subject = "Budget Alert Notification"
 
+    # Check first if notification already exists
     if total_expenses >= threshold and user.budget_alerts:
-        message = f"⚠️ Alert: You've reached 96% of your budget ({total_expenses}/{limit})."
-        subject = "Budget Alert Notification"
-
-        email_sent = sms_sent = False
-
-        if user.email_notification and user.email:
-            email_sent = send_email_notification(subject, message, user.email)
-
-        if user.sms_notification and user.phone_number:
-            formatted_phone = format_phone_number(user.phone_number)
-            print(f"DEBUG: Sending SMS to {formatted_phone}")
-            sms_sent = send_sms_philsms(formatted_phone, message)
-
-        # Avoid duplicate notifications
         if not Notification.objects.filter(user=user, type="General", message=message).exists():
+            email_sent = sms_sent = False
+
+            if user.email_notification and user.email:
+                email_sent = send_email_notification(subject, message, user.email)
+
+            if user.sms_notification and user.phone_number:
+                formatted_phone = format_phone_number(user.phone_number)
+                print(f"DEBUG: Sending SMS to {formatted_phone}")
+                sms_sent = send_sms_philsms(formatted_phone, message)
+
+            # Create notification record after sending
             Notification.objects.create(
                 user=user,
                 message=message,
                 status="Sent" if email_sent or sms_sent else "Unsent",
                 type="General"
             )
-
-    # Always call AI notification service
-    create_ai_budget_notification(user)
+            
+    if total_expenses > limit:
+        create_ai_budget_notification(user)
 
 # ------------------------------
 # HELPER FUNCTIONS

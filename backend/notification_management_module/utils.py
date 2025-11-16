@@ -1,7 +1,8 @@
-# notification_utils.py
+# notification_utils.py (Full Code with Final Fixes)
 from django.conf import settings
 from django.core.mail import send_mail
 import requests
+import requests.exceptions
 
 # ------------------------------
 # 📧 EMAIL FUNCTION
@@ -40,37 +41,44 @@ def format_phone_number(phone_number: str) -> str:
         if len(phone_number) == 10 and not phone_number.startswith('63'):
             phone_number = '63' + phone_number
     return phone_number
-# notification_utils.py
+
 def send_sms_philsms(phone_number, message):
     """Sends SMS using PhilSMS API via requests with detailed logging."""
     try:
         phone_number = format_phone_number(phone_number)
         print(f"DEBUG: Formatted phone number: {phone_number}")
-        print(f"DEBUG: PHILSMS_API_TOKEN={settings.PHILSMS_API_TOKEN}")
+        
+        # 💡 FINAL FIX: Strip whitespace (including newlines) from the token
+        api_token = settings.PHILSMS_API_TOKEN.strip() 
+
+        print(f"DEBUG: PHILSMS_API_TOKEN={api_token}")
         print(f"DEBUG: PHILSMS_SENDER_ID={settings.PHILSMS_SENDER_ID}")
 
         headers = {
-            "Authorization": f"Bearer {settings.PHILSMS_API_TOKEN}",
+            # Use the stripped token
+            "Authorization": f"Bearer {api_token}", 
             "Content-Type": "application/json"
         }
 
         data = {
             "recipient": phone_number,
             "sender_id": settings.PHILSMS_SENDER_ID,
+            "type:": "plain",
             "message": message
         }
 
         print(f"DEBUG: Payload sent to PhilSMS: {data}")
 
+        # ✅ Corrected URL: Using PHILSMS_API_URL from settings
         response = requests.post(
-            "https://dashboard.philsms.com/api/v3/sms/send",
+            f"{settings.PHILSMS_API_URL}/sms/send",
             json=data,
             headers=headers
         )
 
         try:
             response_content = response.json()
-        except Exception:
+        except requests.exceptions.JSONDecodeError:
             response_content = response.text
 
         print(f"PhilSMS API response (status {response.status_code}): {response_content}")
@@ -79,9 +87,12 @@ def send_sms_philsms(phone_number, message):
             print(f"SMS sent to {phone_number}")
             return True
         else:
-            print("Failed to send SMS. Check API response above.")
+            print(f"Failed to send SMS. Status code: {response.status_code}. Response: {response_content}")
             return False
 
+    except requests.exceptions.RequestException as e:
+        print(f"Network error occurred while sending SMS: {e}")
+        return False
     except Exception as e:
-        print(f"Exception occurred while sending SMS: {e}")
+        print(f"General exception occurred while sending SMS: {e}")
         return False
