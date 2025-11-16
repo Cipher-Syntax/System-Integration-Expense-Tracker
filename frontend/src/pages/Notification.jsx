@@ -96,10 +96,10 @@ const Notification = ({ onUnreadUpdate }) => {
                 {notifications.map(n => {
                     const isUnread = !n.is_read;
                     const bgClass = n.type === 'Recommendation'
-                        ? (isUnread ? 'bg-red-100' : 'bg-red-50')
+                        ? (isUnread ? 'bg-red-100' : 'bg-gray-200')
                         : (isUnread ? 'bg-yellow-100' : 'bg-yellow-50');
                     const borderClass = n.type === 'Recommendation'
-                        ? (isUnread ? 'border-red-400' : 'border-red-300')
+                        ? (isUnread ? 'border-red-400' : 'border-gray-300')
                         : (isUnread ? 'border-yellow-400' : 'border-yellow-300');
                     const dotColor = n.type === 'Recommendation' ? 'text-red-700' : 'text-yellow-500';
 
@@ -143,7 +143,7 @@ const Notification = ({ onUnreadUpdate }) => {
                             </div>
                         )}
 
-                        <div className="flex flex-col sm:flex-row justify-between gap-2">
+                        {/* <div className="flex flex-col sm:flex-row justify-between gap-2">
                             {!selectedNotification.is_read && (
                                 <button
                                     onClick={() => markAsRead(selectedNotification)}
@@ -158,7 +158,7 @@ const Notification = ({ onUnreadUpdate }) => {
                             >
                                 <Trash2 className="w-4 h-4" /> Delete
                             </button>
-                        </div>
+                        </div> */}
 
                         <button
                             onClick={() => setSelectedNotification(null)}
