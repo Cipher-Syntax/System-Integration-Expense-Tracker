@@ -57,11 +57,12 @@ const Expenses = () => {
     }, [expensesData]);
 
     useEffect(() => {
-        if (budgetData) {
-            // Only include active budgets
-            const activeBudgets = budgetData.filter(b => b.status === "active");
-            setBudgets(activeBudgets);
-        }
+        // if (budgetData) {
+        //     // Only include active budgets
+        //     const activeBudgets = budgetData.filter(b => b.status === "active");
+        //     setBudgets(activeBudgets);
+        // }
+        if(budgetData) setBudgets(budgetData)
     }, [budgetData]);
 
     const handleSubmitNewBudget = async (e) => {
