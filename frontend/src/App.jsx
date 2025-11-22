@@ -15,9 +15,11 @@ const App = () => {
                 <Route path='/forgot-password' element={<ForgotPassword />} />
                 <Route path='api/reset-password/:uid/:token' element={<PasswordResetConfirm />} />
                 <Route path='*' element={<NotFound />} />
-
                 <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
-                    <Route path='/' element={<Dashboard />} />
+                    <Route path="/" element={<Dashboard />} />
+                </Route>
+                <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+                    {/* <Route path='/' element={<Dashboard />} /> */}
                     <Route path='/expenses' element={<Expenses />} />
                     <Route path='/budgets' element={<Budgets />} />
                     <Route path='/reports' element={<Reports />} />
