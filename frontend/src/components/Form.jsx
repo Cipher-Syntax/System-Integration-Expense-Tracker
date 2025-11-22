@@ -68,7 +68,7 @@ const Form = ({ route, method }) => {
                 localStorage.setItem("access_token", res.data.access);
                 localStorage.setItem("user", data.username);
 
-                navigate("/home");
+                navigate("/");
             } else {
                 // On registration, navigate to login
                 navigate("/login");
@@ -77,7 +77,9 @@ const Form = ({ route, method }) => {
             const res = err.response;
             if (res) {
                 if (res.status === 401) {
-                    setError(res.data.detail === "No active account found with the given credentials" ? "Invalid username or password" : res.data.detail);
+                    setError(res.data.detail === "No active account found with the given credentials"
+                        ? "Invalid username or password"
+                        : res.data.detail);
                 } else if (res.status === 400) {
                     setError(res.data.username?.[0] || res.data.email?.[0] || "Something went wrong");
                 } else setError("Network error. Please try again");
