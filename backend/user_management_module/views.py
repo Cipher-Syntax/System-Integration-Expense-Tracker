@@ -106,8 +106,8 @@ class CookieTokenObtainPairView(TokenObtainPairView):
             key='access_token',
             value=access_token,
             httponly=True,
-            secure=False,  # Change to True in production (https)
-            samesite='Lax',
+            secure=True,  # Change to True in production (https)
+            samesite='None',
             max_age=60 * 5, 
         )
         response.set_cookie(
@@ -115,7 +115,7 @@ class CookieTokenObtainPairView(TokenObtainPairView):
             value=refresh_token,
             httponly=True,
             secure=False, # Change to True in production (https)
-            samesite='Lax',  # change to none if backend and frontend are deployed separatedly
+            samesite='None',  # change to none if backend and frontend are deployed separatedly
             max_age=60 * 60 * 24 * 7,
         )
 
@@ -139,8 +139,8 @@ class CookieTokenRefreshView(TokenRefreshView):
             key='access_token',
             value=access_token,
             httponly=True,
-            secure=False,  # change to True in production
-            samesite='Lax', # change to none if backend and frontend are deployed separatedly
+            secure=True,  # change to True in production
+            samesite='None', # change to none if backend and frontend are deployed separatedly
             max_age=60 * 5,
         )
 
