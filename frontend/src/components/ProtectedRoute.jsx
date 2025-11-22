@@ -5,41 +5,25 @@ import api from '../api/api';
 const ProtectedRoute = ({ children }) => {
     const [isAuthorized, setIsAuthorized] = useState(null);
 
-    const checkAuth = async () => {
-        try {
+    useEffect(() => {
+        const checkAuth = async () => {
             const refreshToken = localStorage.getItem("refresh");
-
             if (!refreshToken) {
                 setIsAuthorized(false);
-                return false;
+                return;
             }
 
-            const res = await api.post("api/token/refresh/", {
-                refresh: refreshToken
-            });
+            try {
+                const res = await api.post("/api/token/refresh/", { refresh: refreshToken });
+                localStorage.setItem("access", res.data.access);
+                setIsAuthorized(true);
+            } catch (err) {
+                console.log("Token refresh failed:", err);
+                setIsAuthorized(false);
+            }
+        };
 
-            // Save the new access token
-            localStorage.setItem("access", res.data.access);
-
-            setIsAuthorized(true);
-            return true;
-
-        } catch (error) {
-            console.log("Failed to refresh token:", error);
-            setIsAuthorized(false);
-            return false;
-        }
-    };
-
-
-    useEffect(() => {
         checkAuth();
-
-        const interval = setInterval(() => {
-            checkAuth();
-        }, 4 * 60 * 1000);
-        
-        return () => clearInterval(interval);
     }, []);
 
     if (isAuthorized === null) {
@@ -50,7 +34,7 @@ const ProtectedRoute = ({ children }) => {
         );
     }
 
-    return isAuthorized ? children : <Navigate to="/login" />;
+    return isAuthorized ? children : <Navigate to="/login" replace />;
 };
 
 export default ProtectedRoute;
