@@ -5,7 +5,6 @@ import api from '../api/api';
 import { LoadingIndicator } from '../components';
 import { useFetch } from '../hooks';
 import { ExpenseFilters, ExpenseList, PaginationControls, ExpenseModal, CategoryModal, BudgetModal, DeleteExpenseModal, ArchivedModal } from '../components/expenses';
-import { encryptId } from '../utils/CryptoUtils';
 
 const Expenses = () => {
     const [searchParams, setSearchParams] = useSearchParams();
