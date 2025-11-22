@@ -83,6 +83,7 @@ SIMPLE_JWT = {
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
+    'backend.middleware.DevCrossOriginMiddleware',
     'allauth.account.middleware.AccountMiddleware', 
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
