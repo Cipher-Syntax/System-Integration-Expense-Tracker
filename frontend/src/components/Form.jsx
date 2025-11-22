@@ -68,7 +68,7 @@ const Form = ({ route, method }) => {
                 localStorage.setItem("access_token", res.data.access);
                 localStorage.setItem("user", data.username);
 
-                navigate("/");
+                navigate("/home");
             } else {
                 // On registration, navigate to login
                 navigate("/login");
