@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
             name='Budget',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('limit_amount', models.DecimalField(decimal_places=2, max_digits=10000)),
+                ('limit_amount', models.DecimalField(decimal_places=2, max_digits=10)),
                 ('start_date', models.DateField()),
                 ('end_date', models.DateField()),
             ],

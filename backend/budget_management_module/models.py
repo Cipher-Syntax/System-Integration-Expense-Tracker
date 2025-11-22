@@ -12,7 +12,7 @@ class Budget(models.Model):
     ]
     
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="budgets")
-    limit_amount = models.DecimalField(max_digits=10000, decimal_places=2)
+    limit_amount = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=15, choices=STATUS_CHOICE, default="active")
     start_date = models.DateField()
     end_date = models.DateField()
