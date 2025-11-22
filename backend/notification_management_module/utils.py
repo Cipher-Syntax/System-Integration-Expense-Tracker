@@ -7,6 +7,7 @@ import requests.exceptions
 # ------------------------------
 # 📧 EMAIL FUNCTION
 # ------------------------------
+    
 def send_email_notification(subject, message, receiver):
     """Sends email using Django's core send_mail."""
     try:

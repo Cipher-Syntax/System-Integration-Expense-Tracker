@@ -4,7 +4,7 @@ import { useSearchParams } from 'react-router-dom';
 import api from '../api/api';
 import { LoadingIndicator } from '../components';
 import { useFetch } from '../hooks';
-import { ExpenseFilters, ExpenseList, PaginationControls, ExpenseModal, CategoryModal, BudgetModal, DeleteExpenseModal } from '../components/expenses';
+import { ExpenseFilters, ExpenseList, PaginationControls, ExpenseModal, CategoryModal, BudgetModal, DeleteExpenseModal, ArchivedModal } from '../components/expenses';
 import { encryptId } from '../utils/CryptoUtils';
 
 const Expenses = () => {
@@ -15,6 +15,7 @@ const Expenses = () => {
     const amount = searchParams.get('amount') || '';
 
     const [showModal, setShowModal] = useState(false);
+    const [showArchivedModal, setShowArchivedModal] = useState(false);
     const [currentExpense, setCurrentExpense] = useState({
         name: '',
         description: '',
@@ -57,12 +58,11 @@ const Expenses = () => {
     }, [expensesData]);
 
     useEffect(() => {
-        // if (budgetData) {
-        //     // Only include active budgets
-        //     const activeBudgets = budgetData.filter(b => b.status === "active");
-        //     setBudgets(activeBudgets);
-        // }
-        if(budgetData) setBudgets(budgetData)
+        if (budgetData) {
+            // Only include active budgets
+            const activeBudgets = budgetData.filter(b => b.status === "active");
+            setBudgets(activeBudgets);
+        }
     }, [budgetData]);
 
     const handleSubmitNewBudget = async (e) => {
@@ -265,6 +265,7 @@ const Expenses = () => {
                     categories={categories}
                     searchParams={searchParams}
                     setSearchParams={setSearchParams}
+                    onArchived={() => setShowArchivedModal(true)}
                     onAdd={() => {
                         setCurrentExpense({
                             name: '',
@@ -335,6 +336,15 @@ const Expenses = () => {
                         deleteTarget={deleteTarget}
                         onCancel={() => setDeleteTarget(null)}
                         onConfirm={confirmDelete}
+                    />
+                )}
+
+                {showArchivedModal && (
+                    <ArchivedModal
+                        isOpen={showArchivedModal}
+                        onClose={() => setShowArchivedModal(false)}
+                        setCurrentExpense={setCurrentExpense}
+                        setShowModal={setShowModal}
                     />
                 )}
 

@@ -5,7 +5,8 @@ import ExpenseModal from "./ExpenseModal";
 import CategoryModal from "./CategoryModal";
 import BudgetModal from "./BudgetModal";
 import DeleteExpenseModal from "./DeleteExpenseModal";
+import ArchivedModal from "./ArchivedModal";
 
 export {
-    ExpenseFilters, ExpenseList, PaginationControls, ExpenseModal, CategoryModal, BudgetModal, DeleteExpenseModal
+    ExpenseFilters, ExpenseList, PaginationControls, ExpenseModal, CategoryModal, BudgetModal, DeleteExpenseModal, ArchivedModal
 }

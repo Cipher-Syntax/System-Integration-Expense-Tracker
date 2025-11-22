@@ -9,6 +9,7 @@ const ExpenseFilters = ({
     categories,
     searchParams,
     setSearchParams,
+    onArchived,
     onAdd
 }) => {
     const handleParamChange = (key, value) => {
@@ -85,12 +86,21 @@ const ExpenseFilters = ({
                         </select>
                     </div>
 
-                    <button
-                        className="w-full sm:w-[250px] py-2 px-2 bg-pink-500 text-white text-center rounded-md font-bold cursor-pointer"
-                        onClick={onAdd}
-                    >
-                        Add Expense
-                    </button>
+                    <div className='flex items-center justify-center gap-x-5'>
+                        <button
+                            className="w-full sm:w-[250px] py-2 px-2 bg-gray-700 text-white text-center rounded-md font-bold cursor-pointer"
+                            onClick={onArchived}
+                        >
+                            Archives
+                        </button>
+
+                        <button
+                            className="w-full sm:w-[250px] py-2 px-2 bg-pink-500 text-white text-center rounded-md font-bold cursor-pointer"
+                            onClick={onAdd}
+                        >
+                            Add Expense
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
