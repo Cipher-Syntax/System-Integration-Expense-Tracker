@@ -7,15 +7,30 @@ const ProtectedRoute = ({ children }) => {
 
     const checkAuth = async () => {
         try {
-            await api.post('api/token/refresh/');
+            const refreshToken = localStorage.getItem("refresh");
+
+            if (!refreshToken) {
+                setIsAuthorized(false);
+                return false;
+            }
+
+            const res = await api.post("api/token/refresh/", {
+                refresh: refreshToken
+            });
+
+            // Save the new access token
+            localStorage.setItem("access", res.data.access);
+
             setIsAuthorized(true);
             return true;
+
         } catch (error) {
-            console.log('Failed to refresh token:', error);
+            console.log("Failed to refresh token:", error);
             setIsAuthorized(false);
             return false;
         }
     };
+
 
     useEffect(() => {
         checkAuth();
