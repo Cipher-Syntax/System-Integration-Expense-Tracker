@@ -32,25 +32,24 @@ def check_budget_limit(user, budget):
 
     # Check first if notification already exists
     if total_expenses >= threshold and user.budget_alerts:
-        if not Notification.objects.filter(user=user, type="General", message=message).exists():
-            email_sent = sms_sent = False
-
-            if user.email_notification and user.email:
-                email_sent = send_email_notification(subject, message, user.email)
-
-            if user.sms_notification and user.phone_number:
-                formatted_phone = format_phone_number(user.phone_number)
-                print(f"DEBUG: Sending SMS to {formatted_phone}")
-                sms_sent = send_sms_philsms(formatted_phone, message)
-
-            # Create notification record after sending
-            Notification.objects.create(
-                user=user,
-                message=message,
-                status="Sent" if email_sent or sms_sent else "Unsent",
-                type="General"
-            )
-    
+                if not Notification.objects.filter(user=user, type="General", message=message).exists():
+                    sms_sent = False
+        
+                    # if user.email_notification and user.email:
+                    #     email_sent = send_email_notification(subject, message, user.email)
+        
+                    if user.sms_notification and user.phone_number:
+                        formatted_phone = format_phone_number(user.phone_number)
+                        print(f"DEBUG: Sending SMS to {formatted_phone}")
+                        sms_sent = send_sms_philsms(formatted_phone, message)
+        
+                    # Create notification record after sending
+                    Notification.objects.create(
+                        user=user,
+                        message=message,
+                        status="Sent" if sms_sent else "Unsent",
+                        type="General"
+                    )    
     # If budget is exceeded, create AI recommendation for this specific budget
     if total_expenses > limit:
         create_ai_budget_notification(user, budget)

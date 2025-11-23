@@ -16,6 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from user_management_module.views import GoogleLoginAPIView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -23,5 +24,5 @@ urlpatterns = [
     path('api/', include('budget_management_module.urls')),
     path('api/', include('expense_management_module.urls')),
     path('api/', include('notification_management_module.urls')),
-    
+    path('api/auth/google/', GoogleLoginAPIView.as_view(), name='google-login-test'),
 ]

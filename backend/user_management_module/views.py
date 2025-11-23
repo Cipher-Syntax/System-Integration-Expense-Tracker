@@ -60,14 +60,19 @@ class PasswordResetRequestView(generics.GenericAPIView):
         reset_link = f"{settings.FRONTEND_BASE_URL}/api/reset-password/{uid}/{token}/"
         print('reset_link: ', reset_link)
 
-        send_mail(
-            subject="Reset Your Password",
-            message=f"Hi {user.username},\n\nClick this link to reset your password:\n{reset_link}\n\nIf you didn't request this, ignore this email.",
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[user.email],
-            fail_silently=False,
-        )
-        return Response({"detail": f"Password reset email sent to {email}."})
+        # send_mail(
+        #     subject="Reset Your Password",
+        #     message=f"Hi {user.username},\n\nClick this link to reset your password:\n{reset_link}\n\nIf you didn't request this, ignore this email.",
+        #     from_email=settings.DEFAULT_FROM_EMAIL,
+        #     recipient_list=[user.email],
+        #     fail_silently=False,
+        # )
+        return Response({
+            "detail": "Password reset email sent to email.",
+            "email": email,
+            "uid": uid,
+            "token": token,
+            })
 
 
 class PasswordResetConfirmView(generics.GenericAPIView):

@@ -18,5 +18,4 @@ urlpatterns = [
     path('auth/', include('dj_rest_auth.urls')),
     path('auth/registration/', include('dj_rest_auth.registration.urls')),
     path('accounts/', include('allauth.urls')),  # Google OAuth callback
-    path('auth/google/', GoogleLoginAPIView.as_view(), name='google-login')
 ]
