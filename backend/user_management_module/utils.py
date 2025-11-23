@@ -20,11 +20,21 @@ def verify_google_token(token):
             return None
 
         # Fetch existing user or create a new one
+        # user, created = User.objects.get_or_create(
+        #     email=email,
+        #     defaults={
+        #         'firstname': 
+        #         "username": name,
+        #         "is_active": True,
+        #     }
+        # )
         user, created = User.objects.get_or_create(
             email=email,
             defaults={
-                "username": name,
-                "is_active": True,
+                'username': email.split('@')[0],
+                'first_name': idinfo.get('given_name', ''),
+                'last_name': idinfo.get('family_name', ''),
+                'is_active': True
             }
         )
 
