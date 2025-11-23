@@ -66,3 +66,4 @@ urllib3==2.5.0
 virtualenv==20.34.0
 whitenoise==6.11.0
 yarl==1.22.0
+resend==2.19.0
