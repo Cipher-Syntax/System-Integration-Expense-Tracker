@@ -16,6 +16,7 @@ from django.conf import settings
 from rest_framework.views import APIView #type: ignore
 from rest_framework_simplejwt.tokens import RefreshToken #type: ignore
 from .utils import verify_google_token
+from rest_framework_simplejwt.exceptions import InvalidToken #type: ignore
 
 
 # Create your views here.
@@ -124,6 +125,32 @@ class CookieTokenObtainPairView(TokenObtainPairView):
 
         return response
     
+# class CookieTokenRefreshView(TokenRefreshView):
+#     serializer_class = TokenRefreshSerializer
+
+#     def post(self, request, *args, **kwargs):
+#         refresh_token = request.COOKIES.get('refresh_token')
+
+#         if not refresh_token:
+#             raise AuthenticationFailed('Refresh token not found in cookies.')
+
+#         serializer = self.get_serializer(data={'refresh': refresh_token})
+#         serializer.is_valid(raise_exception=True)
+
+#         access_token = serializer.validated_data.get('access')
+#         response = Response({'access': access_token}, status=status.HTTP_200_OK)
+        
+#         response.set_cookie(
+#             key='access_token',
+#             value=access_token,
+#             httponly=True,
+#             secure=True, 
+#             samesite='None', 
+#             max_age=60 * 5,
+#         )
+
+#         return response
+
 class CookieTokenRefreshView(TokenRefreshView):
     serializer_class = TokenRefreshSerializer
 
@@ -133,12 +160,25 @@ class CookieTokenRefreshView(TokenRefreshView):
         if not refresh_token:
             raise AuthenticationFailed('Refresh token not found in cookies.')
 
-        serializer = self.get_serializer(data={'refresh': refresh_token})
-        serializer.is_valid(raise_exception=True)
+        try:
+            serializer = self.get_serializer(data={'refresh': refresh_token})
+            serializer.is_valid(raise_exception=True)
+            access_token = serializer.validated_data.get('access')
 
-        access_token = serializer.validated_data.get('access')
+        except User.DoesNotExist:
+            # Clear cookies if the user does not exist
+            response = Response({"detail": "User not found. Please login again."}, status=401)
+            response.delete_cookie('access_token')
+            response.delete_cookie('refresh_token')
+            return response
+
+        except InvalidToken:
+            response = Response({"detail": "Invalid or expired refresh token."}, status=401)
+            response.delete_cookie('access_token')
+            response.delete_cookie('refresh_token')
+            return response
+
         response = Response({'access': access_token}, status=status.HTTP_200_OK)
-        
         response.set_cookie(
             key='access_token',
             value=access_token,
@@ -149,6 +189,7 @@ class CookieTokenRefreshView(TokenRefreshView):
         )
 
         return response
+
 
 class GoogleLoginAPIView(APIView):
     def post(self, request):
