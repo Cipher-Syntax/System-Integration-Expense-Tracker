@@ -290,7 +290,7 @@ const Notification = ({ onUnreadUpdate }) => {
                                 onClick={() => handleSelectNotification(n)}
                                 className={`flex items-start p-4 rounded-xl border shadow-sm active:scale-[0.98] transition-all cursor-pointer ${bgClass}`}
                             >
-                                <div className="flex-shrink-0 mr-3 mt-1">
+                                <div className="flex-shrink-0 mt-1">
                                     {!n.is_read ? <Dot className={`w-6 h-6 ${dotColor}`} /> :
                                         n.type === 'Achievement' ? <Medal className="w-5 h-5 text-yellow-500" /> :
                                             <CheckCircle2 className="w-5 h-5 text-gray-400" />}
