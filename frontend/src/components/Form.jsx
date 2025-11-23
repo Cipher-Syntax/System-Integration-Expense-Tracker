@@ -270,7 +270,7 @@ const Form = ({ route, method }) => {
 
                                 {
                                     method === "login" ? (
-                                        <Link to="forgot-password" className="text-[10px] text-pink-500 text-right w-full my-5">
+                                        <Link to="/forgot-password" className="text-[10px] text-pink-500 text-right w-full my-5">
                                             Forgot Password?
                                         </Link>
                                     ) : (
