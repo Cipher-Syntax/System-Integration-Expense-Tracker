@@ -87,7 +87,7 @@ const Notification = ({ onUnreadUpdate }) => {
 
 
     return (
-        <section className="w-full min-h-screen px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8">
+        <section className="mt-26 w-full min-h-screen px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8">
             <div className="max-w-4xl mx-auto">
                 <div className="flex items-center justify-between mb-6 sm:mb-8">
                     <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Notifications</h1>

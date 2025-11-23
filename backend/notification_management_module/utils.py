@@ -117,6 +117,9 @@ class EmailThread(threading.Thread):
 
     def run(self):
         try:
+            # ADDED: Print BEFORE sending to confirm the thread started
+            print(f"DEBUG: EmailThread started. Preparing to send to {self.recipient_list}...")
+            
             send_mail(
                 subject=self.subject,
                 message=self.message,
@@ -124,9 +127,9 @@ class EmailThread(threading.Thread):
                 recipient_list=self.recipient_list,
                 fail_silently=False,
             )
-            print(f"Email sent successfully to {self.recipient_list}")
+            print(f"DEBUG: Email sent successfully to {self.recipient_list}")
         except Exception as e:
-            print(f"Failed to send email: {e}")
+            print(f"DEBUG: Failed to send email: {e}")
 
 def send_email_notification(subject, message, receiver):
     """
@@ -134,11 +137,14 @@ def send_email_notification(subject, message, receiver):
     Returns True immediately to prevent blocking the HTTP request.
     """
     try:
+        # ADDED: Print to confirm the main function was actually called
+        print(f"DEBUG: send_email_notification called for {receiver}")
+        
         email_thread = EmailThread(subject, message, receiver)
         email_thread.start()
         return True
     except Exception as e:
-        print(f"Error initializing email thread: {e}")
+        print(f"DEBUG: Error initializing email thread: {e}")
         return False
 
 # ------------------------------
@@ -163,7 +169,7 @@ class SMSThread(threading.Thread):
     def __init__(self, phone_number, message):
         self.phone_number = phone_number
         self.message = message
-        threading.Thread.__init__(self)
+        self.threading = threading.Thread.__init__(self)
 
     def run(self):
         """
