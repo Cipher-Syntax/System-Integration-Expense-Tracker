@@ -7,18 +7,16 @@ const ProtectedRoute = ({ children }) => {
 
     useEffect(() => {
         const checkAuth = async () => {
-            const refreshToken = localStorage.getItem("refresh");
-            if (!refreshToken) {
-                setIsAuthorized(false);
-                return;
-            }
-
             try {
-                const res = await api.post("/api/token/refresh/", { refresh: refreshToken });
-                localStorage.setItem("access", res.data.access);
+                // We cannot check localStorage. We simply attempt to hit the endpoint.
+                // Because 'withCredentials: true' is in your api.js, cookies are sent automatically.
+                // If the Refresh Token cookie is valid, the backend returns 200 OK.
+                await api.post("/api/token/refresh/");
+                
+                // If the code reaches here, the refresh was successful (user is logged in)
                 setIsAuthorized(true);
             } catch (err) {
-                console.log("Token refresh failed:", err);
+                console.log("Token refresh failed/User not authenticated:", err);
                 setIsAuthorized(false);
             }
         };
