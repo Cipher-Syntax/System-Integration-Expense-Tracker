@@ -161,13 +161,13 @@ const Form = ({ route, method }) => {
 
                     {/* Right panel: Form */}
                     <div className="w-full">
-                        <form onSubmit={handleSubmit(onSubmit)} className={`sm:bg-white/80 backdrop-blur-xl rounded-2xl sm:shadow-2xl p-5 sm:border sm:border-white/20 ${method === "register" ? "sm:h-[600px]" : "sm:h-[560px]"}`}>
+                        <form onSubmit={handleSubmit(onSubmit)} className={`flex flex-col items-center justify-center sm:bg-white/80 backdrop-blur-xl rounded-2xl sm:shadow-2xl p-5 sm:border sm:border-white/20 ${method === "register" ? "sm:h-[670px]" : "sm:h-[560px]"}`}>
                             <h2 className="text-2xl font-bold text-gray-800 mb-0.5 text-center mt-10 leading-relaxed tracking-wider">{status}</h2>
                             <p className="text-center text-gray-500 text-xs mb-3">Sign in to your expense tracker</p>
 
                             {error && <p className="text-red-500 text-sm text-center font-medium animate-fade-in">{error}</p>}
 
-                            <div className="space-y-5 mt-7">
+                            <div className="space-y-5 mt-7 w-full">
                                 {/* Username & Phone Number row */}
                                 {
                                     method === "login" && (
@@ -284,21 +284,17 @@ const Form = ({ route, method }) => {
                                     <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
                                 </button>
 
-                                {method === "login" && (
-                                    <>
-                                            <div className="flex items-center my-3 justify-center">
-                                                <div className="flex-grow border-t border-gray-300"></div>
-                                                <span className="px-3 text-gray-400 text-xs font-medium">or</span>
-                                                <div className="flex-grow border-t border-gray-300"></div>
-                                            </div>
-                                            <span className="mx-auto">
-                                                <GoogleLogin
-                                                    onSuccess={handleGoogleLogin}
-                                                    onError={() => setError("Google login failed")}
-                                                />
-                                            </span>
-                                    </>
-                                )}
+                                <div className="flex items-center my-3 justify-center">
+                                    <div className="flex-grow border-t border-gray-300"></div>
+                                    <span className="px-3 text-gray-400 text-xs font-medium">or</span>
+                                    <div className="flex-grow border-t border-gray-300"></div>
+                                </div>
+                                <span className="mx-auto">
+                                    <GoogleLogin
+                                        onSuccess={handleGoogleLogin}
+                                        onError={() => setError("Google login failed")}
+                                    />
+                                </span>
                             </div>
 
                             {/* Footer links */}
