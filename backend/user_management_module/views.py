@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from rest_framework import viewsets, generics, permissions, status #type: ignore
 from rest_framework.response import Response #type: ignore
-from .serializers import UserSerializer, ForgotPasswordSerializer, PasswordResetConfirmSerializer
+from .serializers import UserSerializer, ForgotPasswordSerializer, PasswordResetConfirmSerializer, CustomTokenObtainPairSerializer
 from django.contrib.auth import  get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_encode
@@ -96,7 +96,8 @@ class PasswordResetConfirmView(generics.GenericAPIView):
         return Response({"detail": "Password has been reset successfully."}, status=status.HTTP_200_OK)
     
 class CookieTokenObtainPairView(TokenObtainPairView):
-    serializer_class = TokenObtainPairSerializer
+    # serializer_class = TokenObtainPairSerializer
+    serializer_class = CustomTokenObtainPairSerializer
 
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)

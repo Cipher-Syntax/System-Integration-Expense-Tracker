@@ -1,5 +1,8 @@
 from rest_framework import serializers #type: ignore
 from django.contrib.auth import get_user_model
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer #type: ignore
+from rest_framework.exceptions import AuthenticationFailed #type: ignore
+from django.contrib.auth import authenticate
 
 User = get_user_model()
 
@@ -77,3 +80,19 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
         return user
 
 
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        username = attrs.get("username")
+        password = attrs.get("password")
+
+        # Use Django's authenticate so we get proper failure behavior
+        user = authenticate(username=username, password=password)
+        if user is None:
+            # Return a clean 401 response via AuthenticationFailed
+            raise AuthenticationFailed(
+                "No active account found with the given credentials",
+                code="authentication_failed"
+            )
+
+        return super().validate(attrs)
