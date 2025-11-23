@@ -1,3 +1,4 @@
+# budget_services.py
 from decimal import Decimal
 from django.db import models
 from django.utils import timezone
@@ -11,7 +12,6 @@ from notification_management_module.services import (
     get_category_with_most_expenses
 )
 from notification_management_module.utils import send_email_notification, send_sms_philsms, format_phone_number
-
 
 # ------------------------------
 # BUDGET ALERT FUNCTION
@@ -113,6 +113,12 @@ def get_total_expenses(user):
 def get_budget_summary(user, budget=None):
     """
     Returns a comprehensive budget summary for the user.
+    
+    Args:
+        user: The user object
+        budget: Optional specific budget. If None, gets current active budget.
+    
+    Returns dict with budget info or None if no budget found
     """
     if budget is None:
         active_budget = get_current_active_budget(user)
