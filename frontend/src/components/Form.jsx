@@ -231,6 +231,16 @@ const Form = ({ route, method }) => {
                                     </div>
                                 )}
 
+                                {
+                                    method === "login" ? (
+                                        <Link>
+                                            Forgot Password?
+                                        </Link>
+                                    ) : (
+                                        ""
+                                    )
+                                }
+
                                 {/* Password */}
                                 <div>
                                     <label className="block text-xs font-semibold text-gray-700 mb-0.5">Password</label>
