@@ -270,7 +270,7 @@ const Form = ({ route, method }) => {
 
                                 {
                                     method === "login" ? (
-                                        <Link to="/forgot-password" className="text-[10px] text-pink-500 text-right w-full my-5">
+                                        <Link to="/forgot-password" className="text-[10px] text-pink-500 text-right w-full mb-[6px] flex items-end justify-end">
                                             Forgot Password?
                                         </Link>
                                     ) : (
@@ -286,7 +286,7 @@ const Form = ({ route, method }) => {
 
                                 {method === "login" && (
                                     <>
-                                            <div className="flex items-center my-3">
+                                            <div className="flex items-center my-3 justify-center">
                                                 <div className="flex-grow border-t border-gray-300"></div>
                                                 <span className="px-3 text-gray-400 text-xs font-medium">or</span>
                                                 <div className="flex-grow border-t border-gray-300"></div>
