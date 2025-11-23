@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Plus } from "lucide-react";
 import api from "../api/api";
 import { useFetch } from "../hooks";
@@ -13,7 +13,8 @@ const Budgets = () => {
     const [activeBudget, setActiveBudget] = useState(null);
     const [totalExpenses, setTotalExpenses] = useState(null);
     const [expenseTracker, setExpenseTracker] = useState(null);
-    const [notificationSent, setNotificationSent] = useState(false);
+    const [lastBudgetId, setLastBudgetId] = useState(null);
+    const emailSentRef = useRef(false);
 
     const [formData, setFormData] = useState({
         limit_amount: "",
@@ -31,9 +32,14 @@ const Budgets = () => {
             const current = budgetData.find((b) => b.status === "active");
             setActiveBudget(current || null);
             setExpenseTracker(current ? current.limit_amount : null);
-            setNotificationSent(false); // Reset notification status when budget changes
+            
+            // Reset email sent flag when budget ID changes
+            if (current?.id !== lastBudgetId) {
+                emailSentRef.current = false;
+                setLastBudgetId(current?.id);
+            }
         }
-    }, [budgetData]);
+    }, [budgetData, lastBudgetId]);
 
     useEffect(() => {
         if (totalExpensesData) {
@@ -46,7 +52,29 @@ const Budgets = () => {
         : 0;
 
     useEffect(() => {
-        if (progressPercent >= 96 && !notificationSent && activeBudget && userData) {
+        // console.log("=== BUDGET EFFECT TRIGGERED ===");
+        // console.log("totalExpenses:", totalExpenses);
+        // console.log("expenseTracker:", expenseTracker);
+        // console.log("activeBudget:", activeBudget);
+        // console.log("userData:", userData);
+        // console.log("emailSentRef.current:", emailSentRef.current);
+        
+        // if (!totalExpenses || !expenseTracker) {
+        //     console.log("EARLY EXIT: Missing totalExpenses or expenseTracker");
+        //     return;
+        // }
+        
+        const calculatedPercent = Math.min((totalExpenses / expenseTracker) * 100, 100);
+        // console.log("calculatedPercent:", calculatedPercent);
+        // console.log("Threshold check (>= 96):", calculatedPercent >= 96);
+        // console.log("emailSentRef check:", !emailSentRef.current);
+        // console.log("activeBudget exists:", !!activeBudget);
+        // console.log("userData exists:", !!userData);
+        
+        if (calculatedPercent >= 96 && !emailSentRef.current && activeBudget && userData) {
+            console.log("✅ ALL CONDITIONS MET - SENDING EMAIL");
+            emailSentRef.current = true; // Mark as sent immediately
+            
             const templateParams = {
                 to_email: userData.email,
                 subject: "Budget Alert",
@@ -55,14 +83,16 @@ const Budgets = () => {
 
             sendEmail(templateParams)
                 .then(() => {
-                    console.log("Budget alert email sent successfully!");
-                    setNotificationSent(true);
+                    console.log("✅ Budget alert email sent successfully!");
                 })
                 .catch((error) => {
-                    console.error("Failed to send budget alert email:", error);
+                    console.error("❌ Failed to send budget alert email:", error);
+                    emailSentRef.current = false; // Reset on failure so it can retry
                 });
+        } else {
+            console.log("❌ Conditions not met for sending email");
         }
-    }, [progressPercent, notificationSent, activeBudget, userData]);
+    }, [totalExpenses, expenseTracker, activeBudget, userData]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
