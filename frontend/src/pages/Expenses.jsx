@@ -25,6 +25,7 @@ const Expenses = () => {
     });
 
     const [error, setError] = useState(null);
+    const [validationErrors, setValidationErrors] = useState({}); // ADD THIS
     const [openModalForNewBudget, setOpenModalForNewBudget] = useState(false);
     const [openModalForNewCategory, setOpenModalForNewCategory] = useState(false);
     const [formDataBudget, setFormDataBudget] = useState({
@@ -58,7 +59,6 @@ const Expenses = () => {
 
     useEffect(() => {
         if (budgetData) {
-            // Only include active budgets
             const activeBudgets = budgetData.filter(b => b.status === "active");
             setBudgets(activeBudgets);
         }
@@ -105,6 +105,20 @@ const Expenses = () => {
 
     const handleSave = async () => {
         try {
+            // VALIDATE REQUIRED FIELDS
+            const newErrors = {};
+            if (!currentExpense.name?.trim()) newErrors.name = 'Expense name is required';
+            if (!currentExpense.amount) newErrors.amount = 'Amount is required';
+            if (!currentExpense.date) newErrors.date = 'Date is required';
+            if (!currentExpense.category) newErrors.category = 'Category is required';
+            if (!currentExpense.budget) newErrors.budget = 'Budget is required';
+
+            if (Object.keys(newErrors).length > 0) {
+                setValidationErrors(newErrors);
+                return;
+            }
+
+            setValidationErrors({});
             setAmountError('');
             setLoading(true);
 
@@ -194,6 +208,7 @@ const Expenses = () => {
         params.delete('edit');
         setSearchParams(params);
         setShowModal(false);
+        setValidationErrors({}); // Clear errors when closing
     };
 
     useEffect(() => {
@@ -207,12 +222,11 @@ const Expenses = () => {
         }
     }, [searchParams, expenses, setSearchParams]);
 
-    // --- Filter expenses by active budgets AND search filters ---
     const activeBudgetIds = budgets.map(b => b.id);
 
     const filteredExpenses = expenses.filter((expense) => {
         if (!expense.budget || !activeBudgetIds.includes(expense.budget?.id || expense.budget)) {
-            return false; // Skip expenses not tied to active budgets
+            return false;
         }
 
         const searchMatch =
@@ -245,7 +259,6 @@ const Expenses = () => {
         return searchMatch && categoryMatch && dateMatch && amountMatch;
     });
 
-    // Pagination
     const totalPages = Math.ceil(filteredExpenses.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
     const sortedExpenses = filteredExpenses.slice().sort((a, b) => b.id - a.id);
@@ -274,6 +287,7 @@ const Expenses = () => {
                             category: '',
                             budget: ''
                         });
+                        setValidationErrors({}); // Clear errors
                         setShowModal(true);
                     }}
                 />
@@ -307,9 +321,11 @@ const Expenses = () => {
                         setOpenModalForNewCategory={() => setOpenModalForNewCategory(true)}
                         amountError={amountError}
                         setAmountError={setAmountError}
+                        validationErrors={validationErrors} // PASS THIS
                         loading={loading}
                         setLoading={setLoading}
                         handleSave={handleSave}
+                        closeModal={closeModal}
                     />
                 )}
 

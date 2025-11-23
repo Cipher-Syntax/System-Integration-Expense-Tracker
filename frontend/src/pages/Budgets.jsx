@@ -52,12 +52,12 @@ const Budgets = () => {
         : 0;
 
     useEffect(() => {
-        console.log("=== BUDGET EFFECT TRIGGERED ===");
-        console.log("totalExpenses:", totalExpenses);
-        console.log("expenseTracker:", expenseTracker);
-        console.log("activeBudget:", activeBudget);
-        console.log("userData:", userData);
-        console.log("emailSentRef.current:", emailSentRef.current);
+        // console.log("=== BUDGET EFFECT TRIGGERED ===");
+        // console.log("totalExpenses:", totalExpenses);
+        // console.log("expenseTracker:", expenseTracker);
+        // console.log("activeBudget:", activeBudget);
+        // console.log("userData:", userData);
+        // console.log("emailSentRef.current:", emailSentRef.current);
         
         if (!totalExpenses || !expenseTracker) {
             console.log("EARLY EXIT: Missing totalExpenses or expenseTracker");

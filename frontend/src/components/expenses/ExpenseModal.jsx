@@ -5,6 +5,7 @@ const ExpenseModal = ({
     setCurrentExpense,
     categories,
     budgets,
+    validationErrors,
     setBudgets,
     setCategories,
     setExpenses,
@@ -58,8 +59,11 @@ const ExpenseModal = ({
                         name="name"
                         value={form.name}
                         onChange={handleChange}
-                        className="border w-full mb-2 p-2 rounded"
+                        className={`border w-full mb-2 p-2 rounded ${validationErrors?.name ? 'border-red-500 bg-red-50' : ''}`}
                     />
+                    {validationErrors?.name && (
+                        <p className="text-red-500 text-sm mb-2">{validationErrors.name}</p>
+                    )}
                 </div>
 
                 <div>
@@ -74,7 +78,7 @@ const ExpenseModal = ({
                                 handleChange({ target: { name: 'category', value: e.target.value } });
                             }
                         }}
-                        className="border w-full mb-2 p-2 rounded"
+                        className={`border w-full mb-2 p-2 rounded ${validationErrors?.category ? 'border-red-500 bg-red-50' : ''}`}
                     >
                         <option value="">Select Category</option>
                         {categories.map((cat) => (
@@ -84,6 +88,9 @@ const ExpenseModal = ({
                         ))}
                         <option value="new-category">Create New Category</option>
                     </select>
+                    {validationErrors?.category && (
+                        <p className="text-red-500 text-sm mb-2">{validationErrors.category}</p>
+                    )}
                 </div>
 
                 <div>
@@ -103,8 +110,11 @@ const ExpenseModal = ({
                         name="date"
                         value={form.date ? new Date(form.date).toISOString().split('T')[0] : ''}
                         onChange={handleChange}
-                        className="border w-full mb-2 p-2 rounded"
+                        className={`border w-full mb-2 p-2 rounded ${validationErrors?.date ? 'border-red-500 bg-red-50' : ''}`}
                     />
+                    {validationErrors?.date && (
+                        <p className="text-red-500 text-sm mb-2">{validationErrors.date}</p>
+                    )}
                 </div>
 
                 <div>
@@ -114,9 +124,12 @@ const ExpenseModal = ({
                         name="amount"
                         value={form.amount}
                         onChange={handleChange}
-                        className="border w-full mb-2 p-2 rounded"
+                        className={`border w-full mb-2 p-2 rounded ${validationErrors?.amount ? 'border-red-500 bg-red-50' : ''}`}
                     />
-                    {amountError && <p className="text-red-500 text-sm mt-2">{amountError}</p>}
+                    {validationErrors?.amount && (
+                        <p className="text-red-500 text-sm mb-2">{validationErrors.amount}</p>
+                    )}
+                    {amountError && <p className="text-red-500 text-sm mb-2">{amountError}</p>}
                 </div>
 
                 <div>
@@ -131,7 +144,7 @@ const ExpenseModal = ({
                                 handleChange({ target: { name: 'budget', value: e.target.value } });
                             }
                         }}
-                        className="border w-full mb-2 p-2 rounded"
+                        className={`border w-full mb-2 p-2 rounded ${validationErrors?.budget ? 'border-red-500 bg-red-50' : ''}`}
                     >
                         <option value="">Select Budget</option>
                         {budgets.filter((b) => b.status === 'active').length > 0 ? (
@@ -150,6 +163,9 @@ const ExpenseModal = ({
                             <option value="new-budget">Create a budget</option>
                         )}
                     </select>
+                    {validationErrors?.budget && (
+                        <p className="text-red-500 text-sm mb-2">{validationErrors.budget}</p>
+                    )}
                 </div>
 
                 <div className="flex flex-col sm:flex-row justify-end gap-3 mt-3">
