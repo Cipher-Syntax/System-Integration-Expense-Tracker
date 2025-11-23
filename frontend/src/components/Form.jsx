@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+// import React, { useEffect, useState } from "react";
 import { Wallet, TrendingUp, PieChart, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -64,9 +64,11 @@ const Form = ({ route, method }) => {
                     ? localStorage.setItem("rememberedUsername", data.username)
                     : localStorage.removeItem("rememberedUsername");
 
-                // Save access token & user
-                localStorage.setItem("access_token", res.data.access);
-                localStorage.setItem("user", data.username);
+                // Note: We no longer save access_token to localStorage. 
+                // It is now an HttpOnly cookie.
+                if (data.username) {
+                    localStorage.setItem("user", data.username);
+                }
 
                 navigate("/");
             } else {
@@ -101,9 +103,13 @@ const Form = ({ route, method }) => {
                 { withCredentials: true } // cookies sent & received
             );
 
-            // Save access token & user only
-            localStorage.setItem("access_token", res.data.access);
-            localStorage.setItem("user", res.data.user || "");
+            // Access Token is now in a Cookie, so we don't save it to localStorage.
+            
+            // We only save the username for display purposes. 
+            // Note: Verify your backend actually returns "user" key in res.data
+            if (res.data.user) {
+                localStorage.setItem("user", res.data.user);
+            }
 
             navigate("/");
         } catch (err) {
@@ -268,15 +274,15 @@ const Form = ({ route, method }) => {
 
                                 {method === "login" && (
                                     <>
-                                        <div className="flex items-center my-3">
-                                            <div className="flex-grow border-t border-gray-300"></div>
-                                            <span className="px-3 text-gray-400 text-xs font-medium">or</span>
-                                            <div className="flex-grow border-t border-gray-300"></div>
-                                        </div>
-                                        <GoogleLogin
-                                            onSuccess={handleGoogleLogin}
-                                            onError={() => setError("Google login failed")}
-                                        />
+                                            <div className="flex items-center my-3">
+                                                <div className="flex-grow border-t border-gray-300"></div>
+                                                <span className="px-3 text-gray-400 text-xs font-medium">or</span>
+                                                <div className="flex-grow border-t border-gray-300"></div>
+                                            </div>
+                                            <GoogleLogin
+                                                onSuccess={handleGoogleLogin}
+                                                onError={() => setError("Google login failed")}
+                                            />
                                     </>
                                 )}
                             </div>

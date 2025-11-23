@@ -163,7 +163,6 @@
 #             "refresh": str(refresh),
 #             "user": user.username
 #         })
-
 from django.shortcuts import render, get_object_or_404
 from rest_framework import viewsets, generics, permissions, status #type: ignore
 from rest_framework.response import Response #type: ignore
@@ -180,8 +179,6 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, Toke
 from rest_framework.exceptions import AuthenticationFailed #type: ignore
 from django.conf import settings
 from rest_framework.views import APIView #type: ignore
-from rest_framework.response import Response #type: ignore
-from rest_framework import status #type: ignore
 from rest_framework_simplejwt.tokens import RefreshToken #type: ignore
 from .utils import verify_google_token
 
@@ -267,7 +264,6 @@ class CookieTokenObtainPairView(TokenObtainPairView):
         access_token = data.get('access')
         refresh_token = data.get('refresh')
         
-        # FIXED: secure=True is required for SameSite='None'
         response.set_cookie(
             key='access_token',
             value=access_token,
@@ -280,7 +276,7 @@ class CookieTokenObtainPairView(TokenObtainPairView):
             key='refresh_token',
             value=refresh_token,
             httponly=True,
-            secure=True, # FIXED: Must be True in production/HTTPS
+            secure=True, 
             samesite='None',  
             max_age=60 * 60 * 24 * 7,
         )
@@ -302,7 +298,6 @@ class CookieTokenRefreshView(TokenRefreshView):
         access_token = serializer.validated_data.get('access')
         response = Response({'access': access_token}, status=status.HTTP_200_OK)
         
-        # FIXED: secure=True is required for SameSite='None'
         response.set_cookie(
             key='access_token',
             value=access_token,
@@ -324,8 +319,30 @@ class GoogleLoginAPIView(APIView):
 
         # Generate JWT tokens
         refresh = RefreshToken.for_user(user)
-        return Response({
-            "access": str(refresh.access_token),
-            "refresh": str(refresh),
-            "user": user.username
+        
+        # We prepare the response
+        response = Response({
+            "user": user.username,
+            # We don't strictly need to send tokens in body anymore, but it's fine to leave them
+            "access": str(refresh.access_token), 
         })
+
+        # --- KEY FIX: SET COOKIES FOR GOOGLE LOGIN TOO ---
+        response.set_cookie(
+            key='access_token',
+            value=str(refresh.access_token),
+            httponly=True,
+            secure=True, 
+            samesite='None',
+            max_age=60 * 5, 
+        )
+        response.set_cookie(
+            key='refresh_token',
+            value=str(refresh),
+            httponly=True,
+            secure=True, 
+            samesite='None',
+            max_age=60 * 60 * 24 * 7, 
+        )
+        
+        return response
