@@ -341,14 +341,14 @@ const Notification = ({ onUnreadUpdate }) => {
 
                             {selectedNotification.type === 'Achievement' && selectedNotification.achievement_details && (
                                 <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-100">
-                                    <p className="text-yellow-800 font-semibold text-center">
+                                    <p className="text-yellow-800 font-semibold text-center text-[12px]">
                                         {selectedNotification.achievement_details}
                                     </p>
                                 </div>
                             )}
 
                             {selectedNotification.type === 'Recommendation' && selectedNotification.recommendation_details && (
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-100 text-gray-800 text-justify">
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-100 text-[12px] text-gray-800 text-justify">
                                     {renderRecommendation(selectedNotification.recommendation_details)}
                                 </div>
                             )}
