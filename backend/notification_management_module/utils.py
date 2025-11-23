@@ -19,7 +19,7 @@ class EmailThread(threading.Thread):
             resend.api_key = settings.RESEND_API_KEY
 
             email_data = {
-                "from": settings.RESEND_FROM_EMAIL,
+                "from": settings.RESEND_API_EMAIL,
                 "to": [self.receiver] if isinstance(self.receiver, str) else self.receiver,
                 "subject": self.subject,
                 "html": self.message,
