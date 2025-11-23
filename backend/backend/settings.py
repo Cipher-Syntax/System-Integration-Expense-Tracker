@@ -244,7 +244,18 @@ SECURE_CROSS_ORIGIN_OPENER_POLICY = None
 # These settings are required to allow cookies to travel between
 # Render (Backend) and Vercel (Frontend)
 
-CORS_ALLOW_HEADERS = ["*"]
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+
 SESSION_COOKIE_SAMESITE = 'None'
 CSRF_COOKIE_SAMESITE = 'None'
 SESSION_COOKIE_SECURE = True
