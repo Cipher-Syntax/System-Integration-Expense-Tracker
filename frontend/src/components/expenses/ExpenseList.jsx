@@ -1,7 +1,6 @@
 import React from 'react';
 import { SquarePen, Trash2 } from 'lucide-react';
-// import { encryptId } from '../../utils/CryptoUtils';
-import { encryptId } from '../../utils/cryptoUtils'
+import { encryptId } from '../../utils/cryptoUtils';
 
 const ExpenseList = ({
     currentExpenses,

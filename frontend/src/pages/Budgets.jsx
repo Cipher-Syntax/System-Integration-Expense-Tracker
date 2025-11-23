@@ -3,6 +3,7 @@ import { Plus } from "lucide-react";
 import api from "../api/api";
 import { useFetch } from "../hooks";
 import { BudgetList, BudgetModal } from '../components/budgets'
+import { sendEmail } from "../utils/email";
 
 const Budgets = () => {
     const [budgets, setBudgets] = useState([]);
@@ -12,6 +13,7 @@ const Budgets = () => {
     const [activeBudget, setActiveBudget] = useState(null);
     const [totalExpenses, setTotalExpenses] = useState(null);
     const [expenseTracker, setExpenseTracker] = useState(null);
+    const [notificationSent, setNotificationSent] = useState(false);
 
     const [formData, setFormData] = useState({
         limit_amount: "",
@@ -21,6 +23,7 @@ const Budgets = () => {
 
     const { data: budgetData, loading, errorData } = useFetch("api/budgets/");
     const { data: totalExpensesData } = useFetch("api/budgets/total_expenses/");
+    const { data: userData } = useFetch("api/profile/");
 
     useEffect(() => {
         if (budgetData) {
@@ -28,6 +31,7 @@ const Budgets = () => {
             const current = budgetData.find((b) => b.status === "active");
             setActiveBudget(current || null);
             setExpenseTracker(current ? current.limit_amount : null);
+            setNotificationSent(false); // Reset notification status when budget changes
         }
     }, [budgetData]);
 
@@ -40,6 +44,25 @@ const Budgets = () => {
     const progressPercent = expenseTracker
         ? Math.min((totalExpenses / expenseTracker) * 100, 100)
         : 0;
+
+    useEffect(() => {
+        if (progressPercent >= 96 && !notificationSent && activeBudget && userData) {
+            const templateParams = {
+                to_email: userData.email,
+                subject: "Budget Alert",
+                message: `You have reached 96% of your budget limit of ₱${activeBudget.limit_amount}.`,
+            };
+
+            sendEmail(templateParams)
+                .then(() => {
+                    console.log("Budget alert email sent successfully!");
+                    setNotificationSent(true);
+                })
+                .catch((error) => {
+                    console.error("Failed to send budget alert email:", error);
+                });
+        }
+    }, [progressPercent, notificationSent, activeBudget, userData]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();

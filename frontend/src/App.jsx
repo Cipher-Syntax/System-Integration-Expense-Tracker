@@ -13,7 +13,7 @@ const App = () => {
                 <Route path='/register' element={<Register />} />
                 <Route path='/logout' element={<Logout />} />
                 <Route path='/forgot-password' element={<ForgotPassword />} />
-                <Route path='api/reset-password/:uid/:token' element={<PasswordResetConfirm />} />
+                <Route path='reset-password/:uid/:token' element={<PasswordResetConfirm />} />
                 <Route path='*' element={<NotFound />} />
 
                 <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>

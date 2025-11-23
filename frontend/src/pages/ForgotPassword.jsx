@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Mail, ArrowLeft, CheckCircle, AlertCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import api from "../api/api";
+import { sendEmail } from "../utils/email";
 
 const ForgotPassword = () => {
     const [email, setEmail] = useState("");
@@ -16,7 +17,18 @@ const ForgotPassword = () => {
 
         try{
             const response = await api.post('/api/password-reset/', { email });
-            setMessage(response.data.detail);
+            const { uid, token } = response.data;
+            const reset_link = `${window.location.origin}/reset-password/${uid}/${token}/`;
+
+            const templateParams = {
+                to_email: email,
+                subject: "Reset Your Password",
+                message: `Hi there,\n\nClick this link to reset your password:\n${reset_link}\n\nIf you didn't request this, ignore this email.`,
+            };
+
+            await sendEmail(templateParams);
+            
+            setMessage("Password reset email sent successfully!");
             const timer = setTimeout(() => {
                 setMessage("");
             }, 3000)

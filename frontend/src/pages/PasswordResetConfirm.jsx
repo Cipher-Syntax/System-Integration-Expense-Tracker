@@ -30,8 +30,8 @@ const PasswordResetConfirm = () => {
         }
 
         try {
-            const uid = window.location.pathname.split("/")[3];
-            const token = window.location.pathname.split("/")[4];
+            const uid = window.location.pathname.split("/")[2];
+            const token = window.location.pathname.split("/")[3];
             await api.post(`/api/reset-password/${uid}/${token}/`, {
                 password,
                 confirm_password: confirmPassword,
