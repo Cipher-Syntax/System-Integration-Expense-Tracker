@@ -1,9 +1,9 @@
 import threading
-import resend #type: ignore
+import requests
 from django.conf import settings
 
 # ------------------------------
-# 📧 EMAIL FUNCTION (RESEND + THREADING)
+# 📧 EMAIL FUNCTION (EMAILJS + THREADING)
 # ------------------------------
 class EmailThread(threading.Thread):
     def __init__(self, subject, message, receiver):
@@ -14,33 +14,42 @@ class EmailThread(threading.Thread):
 
     def run(self):
         try:
-            print(f"DEBUG: EmailThread started. Sending to {self.receiver} using Resend...")
+            print(f"DEBUG: EmailThread started. Sending to {self.receiver} using EmailJS...")
 
-            resend.api_key = settings.RESEND_API_KEY
-
-            email_data = {
-                "from": settings.RESEND_API_EMAIL,
-                "to": [self.receiver] if isinstance(self.receiver, str) else self.receiver,
-                "subject": self.subject,
-                "html": self.message,
+            payload = {
+                "service_id": settings.EMAILJS_SERVICE_ID,
+                "template_id": settings.EMAILJS_TEMPLATE_ID,
+                "user_id": settings.EMAILJS_PUBLIC_KEY,
+                "template_params": {
+                    "to_email": self.receiver,
+                    "subject": self.subject,
+                    "message": self.message
+                }
             }
 
-            response = resend.Emails.send(email_data)
+            response = requests.post(
+                "https://api.emailjs.com/api/v1.0/email/send",
+                json=payload,
+                headers={"Content-Type": "application/json"}
+            )
 
-            print(f"DEBUG: Resend response: {response}")
-            print(f"DEBUG: Email sent successfully to {self.receiver}")
+            print(f"DEBUG: EmailJS response: {response.status_code}, {response.text}")
+            if response.status_code == 200:
+                print(f"DEBUG: Email sent successfully to {self.receiver}")
+            else:
+                print(f"DEBUG: Failed to send email. Response: {response.text}")
 
         except Exception as e:
-            print(f"DEBUG: Failed to send email via Resend: {e}")
+            print(f"DEBUG: Failed to send email via EmailJS: {e}")
 
 
 def send_email_notification(subject, message, receiver):
     """
-    Starts EmailThread using Resend API.
+    Starts EmailThread using EmailJS API.
     Returns True immediately (non-blocking).
     """
     try:
-        print(f"DEBUG: send_email_notification called for {receiver} (Resend)")
+        print(f"DEBUG: send_email_notification called for {receiver} (EmailJS)")
 
         email_thread = EmailThread(subject, message, receiver)
         email_thread.start()
@@ -48,9 +57,8 @@ def send_email_notification(subject, message, receiver):
         return True
 
     except Exception as e:
-        print(f"DEBUG: Error initializing Resend email thread: {e}")
+        print(f"DEBUG: Error initializing EmailJS email thread: {e}")
         return False
-
 
 
 # ======================================================================

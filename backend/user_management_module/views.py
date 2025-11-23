@@ -16,6 +16,7 @@ from django.conf import settings
 from rest_framework.views import APIView #type: ignore
 from rest_framework_simplejwt.tokens import RefreshToken #type: ignore
 from .utils import verify_google_token
+from notification_management_module.utils import send_email_notification
 
 
 # Create your views here.
@@ -54,20 +55,22 @@ class PasswordResetRequestView(generics.GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         email = serializer.validated_data['email']
-        user = User.objects.get(email=email)
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
         token = default_token_generator.make_token(user)
         uid = urlsafe_base64_encode(force_bytes(user.pk))
-        reset_link = f"{settings.FRONTEND_BASE_URL}/api/reset-password/{uid}/{token}/"
-        print('reset_link: ', reset_link)
+        reset_link = f"{settings.FRONTEND_BASE_URL}/reset-password/{uid}/{token}/"
 
-        send_mail(
-            subject="Reset Your Password",
-            message=f"Hi {user.username},\n\nClick this link to reset your password:\n{reset_link}\n\nIf you didn't request this, ignore this email.",
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[user.email],
-            fail_silently=False,
-        )
-        return Response({"detail": f"Password reset email sent to {email}."})
+        subject = "Reset Your Password"
+        message = f"Hi {user.username}, click this link to reset your password: {reset_link}"
+
+        send_email_notification(subject, message, user.email)
+
+        return Response({"detail": f"Password reset email sent to {email}."}, status=status.HTTP_200_OK)
 
 
 class PasswordResetConfirmView(generics.GenericAPIView):
