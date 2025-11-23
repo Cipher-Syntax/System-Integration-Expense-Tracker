@@ -231,15 +231,7 @@ const Form = ({ route, method }) => {
                                     </div>
                                 )}
 
-                                {
-                                    method === "login" ? (
-                                        <Link>
-                                            Forgot Password?
-                                        </Link>
-                                    ) : (
-                                        ""
-                                    )
-                                }
+                               
 
                                 {/* Password */}
                                 <div>
@@ -275,6 +267,16 @@ const Form = ({ route, method }) => {
                                         {errors.confirm_password && <p className="text-red-500 text-sm">{errors.confirm_password.message}</p>}
                                     </div>
                                 )}
+
+                                {
+                                    method === "login" ? (
+                                        <Link className="text-[10px] text-pink-500 text-right">
+                                            Forgot Password?
+                                        </Link>
+                                    ) : (
+                                        ""
+                                    )
+                                }
 
                                 {/* Submit */}
                                 <button type="submit" disabled={isSubmitting} className={`w-full text-white font-bold py-3 rounded-lg hover:shadow-lg hover:shadow-pink-500/30 transition-all duration-300 flex items-center justify-center gap-2 ${isSubmitting ? "bg-pink-400 cursor-not-allowed" : "bg-gradient-to-r from-pink-500 to-pink-600"}`}>
