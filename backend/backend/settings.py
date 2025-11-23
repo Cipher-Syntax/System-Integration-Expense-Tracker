@@ -190,6 +190,14 @@ BLACKLIST_AFTER_ROTATION = config('BLACKLIST_AFTER_ROTATION', default=True, cast
 EMAIL_BACKEND = config('EMAIL_BACKEND')
 EMAIL_HOST = config('EMAIL_HOST')
 EMAIL_PORT = config('EMAIL_PORT', cast=int)
+
+if EMAIL_PORT == 465:
+    EMAIL_USE_SSL = True
+    EMAIL_USE_TLS = False
+else:
+    EMAIL_USE_SSL = False
+    EMAIL_USE_TLS = True
+
 EMAIL_USE_TLS = config('EMAIL_USE_TLS', cast=bool)
 EMAIL_USE_SSL = config('EMAIL_USE_SSL', cast=bool)
 EMAIL_TIMEOUT = config('EMAIL_TIMEOUT', cast=int)
