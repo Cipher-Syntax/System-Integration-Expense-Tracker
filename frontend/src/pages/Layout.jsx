@@ -14,9 +14,9 @@ const Layout = () => {
             <main className='w-full py-16'>
                 <Outlet></Outlet>
             </main>
-            <footer className='w-[300px] fixed left-[40%] md:left-[80%] bottom-[5%]'>
+            {/* <footer className='w-[300px] fixed left-[40%] md:left-[80%] bottom-[5%]'>
                 <Footer></Footer>
-            </footer>
+            </footer> */}
         </div>
     )
 }
