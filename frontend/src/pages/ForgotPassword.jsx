@@ -19,6 +19,7 @@ const ForgotPassword = () => {
             const response = await api.post('/api/password-reset/', { email });
             const { uid, token } = response.data;
             const reset_link = `${window.location.origin}/reset-password/${uid}/${token}/`;
+            console.log(reset_link)
 
             const templateParams = {
                 to_email: email,
