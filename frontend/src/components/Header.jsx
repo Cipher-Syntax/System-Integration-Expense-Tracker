@@ -15,7 +15,7 @@ const Header = () => {
                     {data.username.charAt(0).toUpperCase()}
                 </p>
             </div>
-            <div className='w-[250px] h-[50px] bg-white rounded-l-full flex flex-col items-center justify-center'>
+            <div className='hidden md:flex w-[250px] h-[50px] bg-white rounded-l-full flex-col items-center justify-center'>
                 <p className='text-gray-700 font-medium text-[12px]'>{data.username}</p>
                 <p className='text-gray-700 font-medium text-[10px]'>{data.email}</p>
             </div>

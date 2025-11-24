@@ -74,7 +74,7 @@ const Dashboard = () => {
         <section className="mt-26 w-full px-4 sm:px-6 md:px-10">
             <h1 className="text-3xl font-bold leading-relaxed tracking-widest text-left">Dashboard</h1>
 
-            <div className="flex flex-col lg:flex-row justify-center lg:justify-between items-center lg:items-start gap-10 mt-10 w-full">
+            <div className="flex flex-col lg:flex-row justify-center lg:justify-between items-center lg:items-start gap-10 mt-10 w-full bg-white px-10 py-10">
                 <div className="flex flex-col items-center lg:items-start w-full">
                     <BalanceCard availableBalance={availableBalance} />
                     <TotalsCard totalExpenses={totalExpenses} budget={budget} />
@@ -84,7 +84,7 @@ const Dashboard = () => {
                 <ExpenseChart chartData={chartData} filter={filter} setFilter={setFilter} />
             </div>
 
-            <div className="flex flex-col lg:flex-row items-start justify-between gap-10 mt-20 mb-10">
+            <div className="flex flex-col lg:flex-row items-start bg-white p-10 justify-between gap-10 mt-20 mb-10">
                 <RecentExpenses expenses={expenses} />
                 <MonthlyExpenses expenses={expenses} />
             </div>

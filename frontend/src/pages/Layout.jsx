@@ -2,21 +2,22 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { Footer, Header, Sidebar } from '../components'
 
-
 const Layout = () => {
     return (
-        <div className='flex items-left justify-left bg-gray-200 min-h-screen w-full'>
+        <div className='flex h-screen w-full bg-gray-200/30'>
+            {/* Fixed Sidebar */}
             <Sidebar></Sidebar>
             
-            <header className='top-15 md:top-0 absolute right-0'>
-                <Header></Header>
-            </header>
-            <main className='w-full py-16'>
-                <Outlet></Outlet>
+            {/* Scrollable Main Content */}
+            <main className='flex-1 flex flex-col overflow-hidden'>
+                <header className='fixed right-0 sm:static flex-shrink-0 mb-4 ml-auto mt-15 sm:mt-0 '>
+                    <Header></Header>
+                </header>
+                
+                <div className='flex-1 overflow-y-auto'>
+                    <Outlet></Outlet>
+                </div>
             </main>
-            {/* <footer className='w-[300px] fixed left-[40%] md:left-[80%] bottom-[5%]'>
-                <Footer></Footer>
-            </footer> */}
         </div>
     )
 }
