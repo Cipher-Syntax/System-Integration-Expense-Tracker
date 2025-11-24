@@ -167,7 +167,7 @@ const Form = ({ route, method }) => {
 
                             {error && <p className="text-red-500 text-sm text-center font-medium animate-fade-in">{error}</p>}
 
-                            <div className="space-y-5 mt-7 w-full">
+                            <div className="space-y-5 mt-7 w-full flex flex-col">
                                 {/* Username & Phone Number row */}
                                 {
                                     method === "login" && (
@@ -289,7 +289,7 @@ const Form = ({ route, method }) => {
                                     <span className="px-3 text-gray-400 text-xs font-medium">or</span>
                                     <div className="flex-grow border-t border-gray-300"></div>
                                 </div>
-                                <span className="mx-auto">
+                                <span className="mx-auto w-full">
                                     <GoogleLogin
                                         onSuccess={handleGoogleLogin}
                                         onError={() => setError("Google login failed")}
