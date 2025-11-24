@@ -289,7 +289,7 @@ const Form = ({ route, method }) => {
                                     <span className="px-3 text-gray-400 text-xs font-medium">or</span>
                                     <div className="flex-grow border-t border-gray-300"></div>
                                 </div>
-                                <span className="mx-auto w-full">
+                                <span className="mx-auto">
                                     <GoogleLogin
                                         onSuccess={handleGoogleLogin}
                                         onError={() => setError("Google login failed")}
