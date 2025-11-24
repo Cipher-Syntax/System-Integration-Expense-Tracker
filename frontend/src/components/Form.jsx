@@ -134,9 +134,10 @@ const Form = ({ route, method }) => {
                 <div className="grid md:grid-cols-2 gap-6 max-w-4xl w-full items-center">
 
                     {/* Left panel */}
-                    <div className="hidden md:flex flex-col space-y-4">
-                        <div className="space-y-4">
-                            <div className="flex items-center gap-2">
+                    {/* Left panel - Now visible on all devices */}
+                    <div className="flex md:flex flex-col space-y-4">
+                        <div className="space-y-4 sm:flex flex-col items-center justify-center sm:justify-start sm:items-start text-center sm:text-left mb-[-60px] sm:mb-0">
+                            <div className="flex flex-col sm:flex-row items-center gap-2 justify-center">
                                 <div className="p-2 bg-gradient-to-br from-pink-500 to-pink-600 rounded-xl">
                                     <Wallet className="w-6 h-6 text-white" />
                                 </div>
@@ -144,7 +145,7 @@ const Form = ({ route, method }) => {
                             </div>
                             <p className="text-sm text-gray-600">Master your money with intelligent expense tracking</p>
                         </div>
-                        <div className="space-y-1">
+                        <div className="hidden sm:flex sm:flex-col space-y-1">
                             {features.map((feature, idx) => (
                                 <div key={idx} className="flex gap-5 group cursor-pointer mt-3 items-center">
                                     <div className="p-3 bg-pink-100 rounded-md text-pink-600 group-hover:bg-pink-500 group-hover:text-white transition-all duration-300">
